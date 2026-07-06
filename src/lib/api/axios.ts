@@ -7,7 +7,13 @@ import axios, {
 import { clearAuthSession, getAccessToken } from "@/store/auth-store";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
+const DEFAULT_API_BASE_URL = "https://be-restaurant-production.up.railway.app";
+
+function normalizeApiBaseUrl(value?: string) {
+  return value?.replace(/\/$/, "") || DEFAULT_API_BASE_URL;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL);
 
 export type ApiQueryValue = string | number | boolean | null | undefined;
 

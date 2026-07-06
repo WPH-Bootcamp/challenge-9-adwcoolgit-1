@@ -1,0 +1,161 @@
+import Image from 'next/image';
+import BagFillIcon from '@iconify-react/lets-icons/bag-fill';
+
+import { Button } from '@/components/shared/button';
+import { FoodyLogo } from '@/components/shared/foody-logo';
+import {
+  homeHeroImageUrl,
+  homeSearchIconUrl,
+  passthroughLoader,
+} from '@/features/home/constants';
+import type { AuthUser } from '@/types/domain';
+
+interface HomeHeroProps {
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+  searchValue: string;
+  onSearchSubmit: (value: string) => void;
+}
+
+export function HomeHero({
+  isAuthenticated,
+  user,
+  searchValue,
+  onSearchSubmit,
+}: HomeHeroProps) {
+  const userName = user?.name?.trim() || 'John Doe';
+
+  return (
+    <section className='relative isolate overflow-hidden bg-(--color-base-black)'>
+      <div className='absolute inset-0'>
+        <Image
+          loader={passthroughLoader}
+          unoptimized
+          src={homeHeroImageUrl}
+          alt='Foody hero background'
+          fill
+          priority
+          sizes='100vw'
+          className='object-cover'
+        />
+        <div className='absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_59.976%,rgba(0,0,0,0.8)_110.09%)]' />
+      </div>
+
+      <div className='relative mx-auto flex min-h-[560px] max-w-360 flex-col px-4 pb-16 sm:min-h-[640px] sm:px-6 sm:pb-24 md:px-8 lg:min-h-[827px] lg:px-30 lg:pb-30'>
+        <header className='flex h-16 items-center justify-between gap-3 sm:h-20 sm:gap-4'>
+          <FoodyLogo surface='dark' />
+
+          {isAuthenticated ? (
+            <div className='flex items-center gap-3 sm:gap-4 md:gap-6'>
+              <button
+                type='button'
+                aria-label='Cart'
+                className='flex size-8 items-center justify-center text-white'
+              >
+                <BagFillIcon height='1em' className='size-7 sm:size-8' />
+              </button>
+              <div className='flex items-center gap-3 sm:gap-4'>
+                <UserAvatar name={userName} avatar={user?.avatar ?? null} />
+                <p className='hidden text-lg font-semibold leading-8 tracking-tight text-white md:block'>
+                  {userName}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className='flex items-center gap-2 sm:gap-3'>
+              <Button
+                href='/login'
+                variant='outline'
+                className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
+              >
+                Sign in
+              </Button>
+              <Button
+                href='/register'
+                variant='solid'
+                className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
+              >
+                Sign up
+              </Button>
+            </div>
+          )}
+        </header>
+
+        <div className='flex flex-1 items-center justify-center'>
+          <div className='flex w-full max-w-178 flex-col items-center gap-6 pt-4 text-white sm:gap-8 sm:pt-6 lg:gap-10 lg:pt-10'>
+            <div className='flex w-full flex-col items-center gap-2'>
+              <h1 className='w-full text-center text-display-md font-extrabold leading-10 sm:text-display-lg sm:leading-11 lg:text-5xl lg:leading-15'>
+                Explore Culinary Experiences
+              </h1>
+              <p className='w-full text-center text-lg font-bold leading-8 sm:text-display-xs sm:leading-9'>
+                Search and refine your choice to discover the perfect
+                restaurant.
+              </p>
+            </div>
+
+            <form
+              key={searchValue}
+              onSubmit={(event) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                onSearchSubmit(String(formData.get('discovery-search') ?? ''));
+              }}
+              className='flex h-14 w-full max-w-151 items-center gap-1.5 rounded-full bg-white px-5 py-2 shadow-[0_12px_28px_rgba(0,0,0,0.18)] sm:px-6'
+            >
+              <div className='relative size-5 flex-none'>
+                <Image
+                  loader={passthroughLoader}
+                  unoptimized
+                  src={homeSearchIconUrl}
+                  alt=''
+                  fill
+                  sizes='20px'
+                  className='object-contain'
+                />
+              </div>
+              <input
+                type='text'
+                name='discovery-search'
+                aria-label='Search restaurants'
+                placeholder='Search restaurants, food and drink'
+                defaultValue={searchValue}
+                className='h-full w-full border-none bg-transparent p-0 text-sm font-normal leading-7 tracking-tight text-neutral-600 outline-none placeholder:text-neutral-600 sm:text-base sm:leading-7.5'
+              />
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function UserAvatar({ name, avatar }: { name: string; avatar: string | null }) {
+  if (avatar) {
+    return (
+      <div className='relative size-10 overflow-hidden rounded-full sm:size-12'>
+        <Image
+          loader={passthroughLoader}
+          unoptimized
+          src={avatar}
+          alt={name}
+          fill
+          sizes='48px'
+          className='object-cover'
+        />
+      </div>
+    );
+  }
+
+  const initials = name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((value) => value[0]?.toUpperCase())
+    .join('');
+
+  return (
+    <div className='flex size-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fdb022_0%,#c12116_100%)] text-sm font-bold leading-7 tracking-tight text-white sm:size-12 sm:text-base sm:leading-7.5'>
+      {initials || 'JD'}
+    </div>
+  );
+}

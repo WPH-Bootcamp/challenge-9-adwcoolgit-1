@@ -1,195 +1,305 @@
-"use client";
+'use client';
 
-import Link from "next/link";
+import { startTransition, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { EmptyState } from "@/components/shared/empty-state";
-import { ErrorState } from "@/components/shared/error-state";
-import { LoadingState } from "@/components/shared/loading-state";
-import { RestaurantCardView } from "@/components/shared/restaurant-card";
-import { RestaurantSection } from "@/components/shared/restaurant-section";
-import { useSessionState } from "@/features/auth/hooks";
+import { Button } from '@/components/shared/button';
+import { useSessionState } from '@/features/auth/hooks';
+import { HomeCategoryStrip } from '@/features/home/components/home-category-strip';
+import { HomeFooter } from '@/features/home/components/home-footer';
+import { HomeHero } from '@/features/home/components/home-hero';
+import { HomeRestaurantCard } from '@/features/home/components/home-restaurant-card';
+import { DiscoveryFilterBar } from '@/features/restaurants/components/filters/discovery-filter-bar';
 import {
-  useBestSellerFeed,
-  useNearbyFeed,
+  defaultDiscoveryState,
+  getDiscoveryLimit,
+  isDiscoveryStateActive,
+  mergeDiscoveryState,
+  parseDiscoveryState,
+  serializeDiscoveryState,
+} from '@/features/restaurants/discovery-state';
+import {
+  useDiscoveryRestaurantFeed,
   useRecommendedFeed,
   useRestaurantFeed,
-} from "@/features/restaurants/hooks";
-import type { RestaurantCard } from "@/types/domain";
+} from '@/features/restaurants/hooks';
+import type { RestaurantCard } from '@/types/domain';
 
-function SectionGrid({
-  items,
-  emptyTitle,
-  emptyDescription,
-  eyebrow,
-}: {
-  items: RestaurantCard[];
-  emptyTitle: string;
-  emptyDescription: string;
-  eyebrow?: string;
-}) {
-  if (items.length === 0) {
-    return <EmptyState title={emptyTitle} description={emptyDescription} />;
+export default function HomePage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isAuthenticated, user } = useSessionState();
+  const discoveryState = useMemo(
+    () => parseDiscoveryState(searchParams),
+    [searchParams]
+  );
+  const isDiscoveryActive = isDiscoveryStateActive(discoveryState);
+  const allRestaurantsQuery = useRestaurantFeed(24);
+  const discoveryQuery = useDiscoveryRestaurantFeed(discoveryState);
+  const recommendedQuery = useRecommendedFeed();
+  const [recommendedVisibleCount, setRecommendedVisibleCount] = useState(12);
+
+  const recommendedRestaurants = useMemo(
+    () =>
+      getRecommendedRestaurants({
+        isAuthenticated,
+        allRestaurants: allRestaurantsQuery.data?.restaurants ?? [],
+        recommended: recommendedQuery.data ?? [],
+      }),
+    [
+      allRestaurantsQuery.data?.restaurants,
+      isAuthenticated,
+      recommendedQuery.data,
+    ]
+  );
+  const visibleRecommendedRestaurants = recommendedRestaurants.slice(
+    0,
+    recommendedVisibleCount
+  );
+  const categoryOptions = useMemo(() => {
+    const allCategories = new Set<string>();
+
+    (allRestaurantsQuery.data?.restaurants ?? []).forEach((restaurant) => {
+      restaurant.categories.forEach((category) => allCategories.add(category));
+    });
+
+    (discoveryQuery.data?.restaurants ?? []).forEach((restaurant) => {
+      restaurant.categories.forEach((category) => allCategories.add(category));
+    });
+
+    if (discoveryState.category) {
+      allCategories.add(discoveryState.category);
+    }
+
+    return Array.from(allCategories).sort((left, right) =>
+      left.localeCompare(right)
+    );
+  }, [
+    allRestaurantsQuery.data?.restaurants,
+    discoveryQuery.data?.restaurants,
+    discoveryState.category,
+  ]);
+
+  const discoveryTotal = discoveryQuery.data?.pagination.total ?? 0;
+  const discoveryLimit = getDiscoveryLimit(discoveryState);
+  const canShowMoreDiscovery =
+    isDiscoveryActive && discoveryLimit < discoveryTotal;
+  const canShowMoreRecommended =
+    !isDiscoveryActive &&
+    recommendedVisibleCount < recommendedRestaurants.length;
+
+  function replaceDiscoveryState(queryString: string) {
+    startTransition(() => {
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+        scroll: false,
+      });
+    });
   }
 
+  function handleDiscoveryPatch(patch: Partial<typeof defaultDiscoveryState>) {
+    const nextState = mergeDiscoveryState(discoveryState, patch);
+    replaceDiscoveryState(serializeDiscoveryState(nextState));
+  }
+
+  function handleSearchSubmit(value: string) {
+    const nextQuery = value.trim();
+
+    if (!nextQuery && !discoveryState.category && !discoveryState.rating) {
+      replaceDiscoveryState('');
+      return;
+    }
+
+    handleDiscoveryPatch({ q: nextQuery });
+  }
+
+  const sectionTitle = isDiscoveryActive
+    ? discoveryState.q
+      ? 'Search Results'
+      : 'Explore Restaurants'
+    : 'Recommended';
+  const sectionRestaurants = isDiscoveryActive
+    ? (discoveryQuery.data?.restaurants ?? [])
+    : visibleRecommendedRestaurants;
+  const isSectionLoading = isDiscoveryActive
+    ? discoveryQuery.isLoading
+    : allRestaurantsQuery.isLoading;
+  const hasSectionError = isDiscoveryActive
+    ? discoveryQuery.isError
+    : allRestaurantsQuery.isError ||
+      (recommendedQuery.isError && isAuthenticated);
+
   return (
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-      {items.map((restaurant) => (
-        <RestaurantCardView key={restaurant.id} restaurant={restaurant} eyebrow={eyebrow} />
-      ))}
+    <main className='min-h-screen bg-white'>
+      <HomeHero
+        isAuthenticated={isAuthenticated}
+        user={user}
+        searchValue={discoveryState.q}
+        onSearchSubmit={handleSearchSubmit}
+      />
+
+      <div className='mx-auto flex max-w-300 flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-10 md:px-8 lg:gap-12 lg:px-0 lg:py-12'>
+        <HomeCategoryStrip />
+
+        <DiscoveryFilterBar
+          categoryOptions={categoryOptions}
+          state={discoveryState}
+          isBusy={discoveryQuery.isFetching}
+          onCategoryChange={(value) =>
+            handleDiscoveryPatch({ category: value })
+          }
+          onRatingChange={(value) => handleDiscoveryPatch({ rating: value })}
+          onReset={() => replaceDiscoveryState('')}
+        />
+
+        <section className='flex flex-col gap-8'>
+          <div className='flex items-center justify-between gap-4'>
+            <h2 className='text-[28px] font-extrabold leading-9.5 text-(--color-neutral-950) lg:text-[32px] lg:leading-10.5'>
+              {sectionTitle}
+            </h2>
+            <Button
+              type='button'
+              variant='text'
+              size='text'
+              onClick={() => {
+                if (isDiscoveryActive) {
+                  handleDiscoveryPatch({
+                    page: '1',
+                    limit: String(discoveryTotal || discoveryLimit),
+                  });
+                  return;
+                }
+
+                setRecommendedVisibleCount(recommendedRestaurants.length);
+              }}
+              className='font-extrabold'
+            >
+              See All
+            </Button>
+          </div>
+
+          {isSectionLoading ? (
+            <RecommendationMessage
+              title={
+                isDiscoveryActive ? 'Loading restaurants' : 'Loading discovery'
+              }
+              description={
+                isDiscoveryActive
+                  ? 'Applying your search and filters to the restaurant list.'
+                  : 'Fetching restaurants and curated sections for your next meal.'
+              }
+            />
+          ) : hasSectionError ? (
+            <RecommendationMessage
+              title={
+                isDiscoveryActive
+                  ? 'Unable to load filtered restaurants'
+                  : 'Unable to load restaurants'
+              }
+              description='We could not load the restaurant data right now. Please try again in a moment.'
+              tone='error'
+            />
+          ) : sectionRestaurants.length === 0 ? (
+            <RecommendationMessage
+              title={
+                isDiscoveryActive
+                  ? 'No restaurants match your filters'
+                  : 'No recommendations yet'
+              }
+              description={
+                isDiscoveryActive
+                  ? 'Try a different keyword or reset your category and rating filters.'
+                  : 'Restaurant recommendations are not available right now.'
+              }
+            />
+          ) : (
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-[370px_396px_396px] xl:justify-between'>
+              {sectionRestaurants.map((restaurant) => (
+                <HomeRestaurantCard
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                />
+              ))}
+            </div>
+          )}
+
+          {canShowMoreRecommended ? (
+            <div className='flex justify-center'>
+              <Button
+                type='button'
+                variant='neutralOutline'
+                size='compact'
+                onClick={() =>
+                  setRecommendedVisibleCount((current) => current + 6)
+                }
+              >
+                Show More
+              </Button>
+            </div>
+          ) : null}
+
+          {canShowMoreDiscovery ? (
+            <div className='flex justify-center'>
+              <Button
+                type='button'
+                variant='neutralOutline'
+                size='compact'
+                onClick={() =>
+                  handleDiscoveryPatch({
+                    page: '1',
+                    limit: String(discoveryLimit + 6),
+                  })
+                }
+              >
+                Show More
+              </Button>
+            </div>
+          ) : null}
+        </section>
+      </div>
+
+      <HomeFooter />
+    </main>
+  );
+}
+
+function RecommendationMessage({
+  title,
+  description,
+  tone = 'neutral',
+}: {
+  title: string;
+  description: string;
+  tone?: 'neutral' | 'error';
+}) {
+  const toneClassName =
+    tone === 'error'
+      ? 'border-[#FEE4E2] bg-[#FEF3F2] text-[#7A271A]'
+      : 'border-(--color-neutral-200) bg-(--color-neutral-25) text-(--color-neutral-700)';
+
+  return (
+    <div className={`rounded-2xl border p-6 ${toneClassName}`}>
+      <p className='text-lg font-extrabold leading-8 tracking-tight'>{title}</p>
+      <p className='mt-1 text-base font-normal leading-7.5 tracking-tight'>
+        {description}
+      </p>
     </div>
   );
 }
 
-export default function HomePage() {
-  const { isAuthenticated, user } = useSessionState();
-  const allRestaurantsQuery = useRestaurantFeed();
-  const bestSellerQuery = useBestSellerFeed();
-  const recommendedQuery = useRecommendedFeed();
-  const nearbyQuery = useNearbyFeed();
-
-  const isInitialLoading = allRestaurantsQuery.isLoading || bestSellerQuery.isLoading;
-  const hasCriticalError = allRestaurantsQuery.isError && bestSellerQuery.isError;
-
-  if (isInitialLoading) {
-    return (
-      <main className="min-h-screen bg-(--color-page) px-6 py-10 lg:px-12 xl:px-20">
-        <div className="mx-auto max-w-[1280px]">
-          <LoadingState
-            title="Loading discovery"
-            description="Fetching restaurants and curated sections for your next meal."
-          />
-        </div>
-      </main>
-    );
+function getRecommendedRestaurants({
+  isAuthenticated,
+  allRestaurants,
+  recommended,
+}: {
+  isAuthenticated: boolean;
+  allRestaurants: RestaurantCard[];
+  recommended: RestaurantCard[];
+}) {
+  if (isAuthenticated && recommended.length > 0) {
+    return recommended;
   }
 
-  if (hasCriticalError) {
-    return (
-      <main className="min-h-screen bg-(--color-page) px-6 py-10 lg:px-12 xl:px-20">
-        <div className="mx-auto max-w-[1280px]">
-          <ErrorState
-            description="We could not load the discovery page right now. Please try again in a moment."
-          />
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="min-h-screen bg-(--color-page) px-6 py-10 lg:px-12 xl:px-20">
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-12">
-        <section className="overflow-hidden rounded-[36px] bg-white px-7 py-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] sm:px-10 sm:py-10">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl space-y-4">
-              <span className="inline-flex rounded-full bg-[rgba(193,33,22,0.08)] px-4 py-2 text-sm font-bold uppercase tracking-[0.14em] text-(--color-primary)">
-                Restaurant Discovery
-              </span>
-              <div className="space-y-3">
-                <h1 className="text-4xl font-extrabold leading-tight text-(--color-neutral-950) sm:text-5xl">
-                  {isAuthenticated && user?.name
-                    ? `Welcome back, ${user.name.split(" ")[0]}`
-                    : "Find your next favorite meal"}
-                </h1>
-                <p className="max-w-2xl text-base font-medium leading-[30px] tracking-[-0.03em] text-(--color-neutral-600) sm:text-lg">
-                  Explore popular restaurants, neighborhood favorites, and curated picks in one place.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              {!isAuthenticated ? (
-                <>
-                  <Link
-                    href="/login"
-                    className="inline-flex h-12 items-center justify-center rounded-full border border-[rgba(10,13,18,0.1)] px-6 text-base font-bold text-(--color-neutral-950)"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="inline-flex h-12 items-center justify-center rounded-full bg-(--color-primary) px-6 text-base font-bold text-(--color-neutral-25)"
-                  >
-                    Create account
-                  </Link>
-                </>
-              ) : (
-                <span className="inline-flex h-12 items-center justify-center rounded-full bg-[rgba(193,33,22,0.08)] px-6 text-base font-bold text-(--color-primary)">
-                  Signed in
-                </span>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <RestaurantSection
-          title="Popular near everyone"
-          description="A quick scan of restaurants diners are opening first today."
-        >
-          <SectionGrid
-            items={allRestaurantsQuery.data?.restaurants ?? []}
-            emptyTitle="No restaurants yet"
-            emptyDescription="No public restaurant data is available right now."
-            eyebrow="Spotlight"
-          />
-        </RestaurantSection>
-
-        <RestaurantSection
-          title="Best Sellers"
-          description="Top-rated places that consistently stand out with diners."
-        >
-          <SectionGrid
-            items={bestSellerQuery.data?.restaurants ?? []}
-            emptyTitle="No best sellers yet"
-            emptyDescription="Best seller recommendations are not available right now."
-            eyebrow="Best seller"
-          />
-        </RestaurantSection>
-
-        {isAuthenticated ? (
-          <RestaurantSection
-            title="Recommended for you"
-            description="Personalized restaurant picks based on your account activity."
-          >
-            {recommendedQuery.isError ? (
-              <ErrorState description="We could not load your recommendations right now." />
-            ) : recommendedQuery.isLoading ? (
-              <LoadingState
-                title="Loading recommendations"
-                description="Curating restaurants just for you."
-              />
-            ) : (
-              <SectionGrid
-                items={recommendedQuery.data ?? []}
-                emptyTitle="No recommendations yet"
-                emptyDescription="Order history or account signals are not enough yet for tailored picks."
-                eyebrow="For you"
-              />
-            )}
-          </RestaurantSection>
-        ) : null}
-
-        {isAuthenticated && user?.latitude !== null && user?.latitude !== undefined && user?.longitude !== null && user?.longitude !== undefined ? (
-          <RestaurantSection
-            title="Nearby"
-            description="Places close to your saved location for a faster delivery decision."
-          >
-            {nearbyQuery.isError ? (
-              <ErrorState description="We could not load nearby restaurants right now." />
-            ) : nearbyQuery.isLoading ? (
-              <LoadingState
-                title="Loading nearby spots"
-                description="Checking restaurants around your saved location."
-              />
-            ) : (
-              <SectionGrid
-                items={nearbyQuery.data ?? []}
-                emptyTitle="No nearby restaurants"
-                emptyDescription="No restaurants were found close to your saved location."
-                eyebrow="Nearby"
-              />
-            )}
-          </RestaurantSection>
-        ) : null}
-      </div>
-    </main>
-  );
+  return allRestaurants;
 }
+

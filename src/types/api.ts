@@ -76,9 +76,18 @@ export interface RestaurantListItemPayload {
   distance?: number | null;
 }
 
+export interface RestaurantListFiltersPayload {
+  range?: number | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  rating?: number | null;
+  category?: string | null;
+}
+
 export interface RestaurantListDataPayload {
   restaurants: RestaurantListItemPayload[];
   pagination: ApiPaginationMeta;
+  filters?: RestaurantListFiltersPayload;
 }
 
 export interface RestaurantReviewUserPayload {
