@@ -25,7 +25,7 @@ export function AuthPageLayout({
         <AuthHero />
         <section className='flex min-h-screen flex-1 items-center justify-center px-6 py-12 lg:px-0'>
           <div className='flex w-full max-w-93.5 flex-col items-stretch gap-(--space-2xl)'>
-            <FoodyLogo surface='light' />
+            <FoodyLogo surface='light' priority />
             <AuthHeader title={title} subtitle={subtitle} />
             <AuthTabs mode={mode} />
             {children}
@@ -86,3 +86,4 @@ function AuthHero() {
     </div>
   );
 }
+

@@ -2,16 +2,31 @@ import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
 
+type FoodyLogoSurface = 'light' | 'dark';
+type FoodyLogoMark = 'red' | 'white';
+type FoodyLogoText = 'brand' | 'white';
+
 interface FoodyLogoProps {
-  surface?: 'light' | 'dark';
+  surface?: FoodyLogoSurface;
+  mark?: FoodyLogoMark;
+  textTone?: FoodyLogoText;
+  priority?: boolean;
   className?: string;
 }
 
-export function FoodyLogo({ surface = 'dark', className }: FoodyLogoProps) {
+export function FoodyLogo({
+  surface = 'dark',
+  mark,
+  textTone,
+  priority = false,
+  className,
+}: FoodyLogoProps) {
+  const resolvedMark = mark ?? (surface === 'light' ? 'red' : 'white');
+  const resolvedTextTone = textTone ?? (surface === 'light' ? 'brand' : 'white');
   const logoSrc =
-    surface === 'light' ? '/images/red-logo.svg' : '/images/white-logo.svg';
+    resolvedMark === 'red' ? '/images/red-logo.svg' : '/images/white-logo.svg';
   const colorClassName =
-    surface === 'light' ? 'text-(--color-primary)' : 'text-white';
+    resolvedTextTone === 'brand' ? 'text-black' : 'text-white';
 
   return (
     <div
@@ -27,7 +42,7 @@ export function FoodyLogo({ surface = 'dark', className }: FoodyLogoProps) {
         width={42}
         height={42}
         className='h-9 w-9 sm:h-10.5 sm:w-10.5'
-        priority
+        priority={priority}
       />
       <span className='text-display-sm font-extrabold leading-9 sm:text-[32px] sm:leading-10.5'>
         Foody

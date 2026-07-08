@@ -26,7 +26,7 @@ export function HomeRestaurantCard({ restaurant }: HomeRestaurantCardProps) {
       href={`/resto/${restaurant.id}`}
       className='flex min-w-0 items-center gap-3 rounded-2xl bg-white p-4 shadow-[0_0_10px_rgba(203,202,202,0.25)] transition-transform duration-200 hover:-translate-y-0.5'
     >
-      <div className='relative size-30 flex-none overflow-hidden rounded-xl bg-(--color-neutral-25)'>
+      <div className='relative h-[120px] w-[120px] flex-none overflow-hidden rounded-[12px] bg-(--color-neutral-25)'>
         {image ? (
           <Image
             loader={passthroughLoader}
@@ -35,7 +35,7 @@ export function HomeRestaurantCard({ restaurant }: HomeRestaurantCardProps) {
             alt={restaurant.name}
             fill
             sizes='120px'
-            className='object-contain p-3'
+            className='object-cover'
           />
         ) : (
           <div className='flex h-full w-full items-center justify-center px-3 text-center text-base font-extrabold leading-6 tracking-tight text-(--color-neutral-950)'>

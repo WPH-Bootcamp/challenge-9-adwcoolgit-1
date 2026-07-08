@@ -5,6 +5,7 @@ import type { ChangeEvent, FocusEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { type UseFormRegisterReturn } from 'react-hook-form';
 
+import { IconButton } from '@/components/shared/icon-button';
 import { checkIconUrl, passthroughLoader } from '@/features/auth/constants';
 
 interface AuthInputFieldProps {
@@ -75,7 +76,6 @@ export function AuthInputField({
     <label
       className={`box-border flex h-14 w-full items-center gap-8 self-stretch rounded-[10px] border bg-white px-3 ${error ? 'border-(--color-primary)' : 'border--300'} ${isFocused && !error ? 'shadow-[0_1px_2px_rgba(16,24,40,0.04)]' : ''}`}
     >
-      {/* {isActive ? ( */}
       <div className='flex h-11.5 my-auto min-w-0 flex-1 flex-col justify-center self-stretch'>
         {isActive && (
           <span className='block w-full text-sm font-normal leading-4 tracking-tight text-neutral-500'>
@@ -128,11 +128,12 @@ export function AuthTrailingButton({
   onClick,
 }: AuthTrailingButtonProps) {
   return (
-    <button
+    <IconButton
       type='button'
+      variant='ghost'
       aria-label={label}
       onClick={onClick}
-      className='flex h-4 w-4 flex-none items-center justify-center text-neutral-500'
+      className='h-4 w-4 flex-none rounded-none p-0 text-neutral-500 sm:h-4 sm:w-4'
     >
       <Image
         loader={passthroughLoader}
@@ -143,7 +144,7 @@ export function AuthTrailingButton({
         height={16}
         className='h-4 w-4'
       />
-    </button>
+    </IconButton>
   );
 }
 

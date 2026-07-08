@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import { FoodyLogo } from '@/components/shared/foody-logo';
 import { passthroughLoader } from '@/features/home/constants';
+import { cn } from '@/lib/utils';
 
 const exploreLinks = [
   'All Food',
@@ -27,23 +28,49 @@ const socialIcons = [
   getIconifyIconUrl('simple-icons/tiktok'),
 ];
 
-export function HomeFooter() {
+interface HomeFooterProps {
+  variant?: 'default' | 'detail';
+}
+
+export function HomeFooter({ variant = 'default' }: HomeFooterProps) {
+  const isDetailVariant = variant === 'detail';
+
   return (
-    <footer className='bg-neutral-950'>
-      <div className='mx-auto flex max-w-[393px] flex-col gap-6 px-4 py-10 lg:grid lg:max-w-360 lg:grid-cols-[380px_200px_200px] lg:justify-between lg:gap-12 lg:px-30 lg:py-20'>
-        <div className='flex flex-col gap-6'>
-          <div className='flex flex-col gap-4'>
-            <FoodyLogo surface='dark' />
-            <p className='text-sm font-normal leading-7 tracking-tight text-(--color-neutral-25)'>
+    <footer
+      className={cn(
+        'bg-neutral-950',
+        isDetailVariant && 'border-t border-neutral-800/80'
+      )}
+    >
+      <div
+        className={cn(
+          'mx-auto flex w-full max-w-360 flex-col items-start gap-8 px-4 sm:px-8 md:flex-row md:justify-between lg:px-30',
+          isDetailVariant
+            ? 'py-8 pb-[calc(2rem+env(safe-area-inset-bottom))]'
+            : 'py-10 lg:py-20'
+        )}
+      >
+        <div className='mx-auto flex w-full max-w-[380px] flex-col items-start gap-10 md:mx-0 md:h-[284px] md:w-[380px] md:flex-none'>
+          <div className='flex w-full flex-col items-start gap-[22px] md:h-[154px] md:w-[380px]'>
+            <FoodyLogo
+              surface='dark'
+              mark='red'
+              textTone='white'
+              className='gap-[15px]'
+            />
+            <p className='w-full text-base font-normal leading-[30px] tracking-tight text-(--color-neutral-25) md:w-[380px]'>
               Enjoy homemade flavors & chef&apos;s signature dishes, freshly
               prepared every day. Order online or visit our nearest branch.
             </p>
           </div>
-          <div className='flex flex-col gap-5'>
-            <p className='text-sm font-extrabold leading-7 text-(--color-neutral-25)'>
-              Follow on Social Media
-            </p>
-            <div className='flex items-center gap-3'>
+
+          <div className='flex w-[196px] flex-col items-start justify-center gap-5 md:h-[90px] md:flex-none'>
+            <div className='flex h-[30px] w-[196px] items-center gap-2 self-stretch'>
+              <p className='text-center text-base font-extrabold leading-[30px] text-(--color-neutral-25)'>
+                Follow on Social Media
+              </p>
+            </div>
+            <div className='flex h-10 w-[196px] items-center gap-3 self-stretch'>
               {socialIcons.map((iconUrl, index) => (
                 <div
                   key={index}
@@ -64,7 +91,17 @@ export function HomeFooter() {
           </div>
         </div>
 
-        <div className='grid grid-cols-2 gap-4 lg:contents'>
+        <FooterColumn
+          className='hidden md:flex'
+          title='Explore'
+          items={exploreLinks}
+        />
+        <FooterColumn
+          className='hidden md:flex'
+          title='Help'
+          items={helpLinks}
+        />
+        <div className='flex  self-stretch md:hidden'>
           <FooterColumn title='Explore' items={exploreLinks} />
           <FooterColumn title='Help' items={helpLinks} />
         </div>
@@ -73,20 +110,47 @@ export function HomeFooter() {
   );
 }
 
-function FooterColumn({ title, items }: { title: string; items: string[] }) {
+function FooterColumn({
+  title,
+  items,
+  className,
+}: {
+  title: string;
+  items: string[];
+  className?: string;
+}) {
   return (
-    <div className='flex flex-col gap-5'>
-      <p className='text-sm font-extrabold leading-7 text-(--color-neutral-25)'>
-        {title}
-      </p>
+    <div
+      className={cn(
+        'flex h-82.5 w-50 flex-none flex-col items-start gap-5',
+        className
+      )}
+    >
+      <FooterRow label={title} isTitle />
       {items.map((item) => (
-        <p
-          key={item}
-          className='text-sm font-normal leading-7 tracking-tight text-(--color-neutral-25)'
-        >
-          {item}
-        </p>
+        <FooterRow key={item} label={item} />
       ))}
+    </div>
+  );
+}
+
+function FooterRow({
+  label,
+  isTitle = false,
+}: {
+  label: string;
+  isTitle?: boolean;
+}) {
+  return (
+    <div className='flex h-7.5 w-50 items-center gap-2 self-stretch bg-neutral-950'>
+      <p
+        className={cn(
+          'text-center font-normal text-sm leading-6.75 md:text-base md:leading-7.5 text-(--color-neutral-25)',
+          isTitle ? 'font-extrabold' : 'font-normal tracking-tight'
+        )}
+      >
+        {label}
+      </p>
     </div>
   );
 }

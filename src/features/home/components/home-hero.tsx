@@ -3,6 +3,7 @@ import BagFillIcon from '@iconify-react/lets-icons/bag-fill';
 
 import { Button } from '@/components/shared/button';
 import { FoodyLogo } from '@/components/shared/foody-logo';
+import { IconButton } from '@/components/shared/icon-button';
 import {
   homeHeroImageUrl,
   homeSearchIconUrl,
@@ -43,17 +44,18 @@ export function HomeHero({
 
       <div className='relative mx-auto flex min-h-[560px] max-w-360 flex-col px-4 pb-16 sm:min-h-[640px] sm:px-6 sm:pb-24 md:px-8 lg:min-h-[827px] lg:px-30 lg:pb-30'>
         <header className='flex h-16 items-center justify-between gap-3 sm:h-20 sm:gap-4'>
-          <FoodyLogo surface='dark' />
+          <FoodyLogo surface='dark' priority />
 
           {isAuthenticated ? (
             <div className='flex items-center gap-3 sm:gap-4 md:gap-6'>
-              <button
+              <IconButton
                 type='button'
+                variant='ghost'
                 aria-label='Cart'
-                className='flex size-8 items-center justify-center text-white'
+                className='size-8 text-white sm:size-8'
               >
                 <BagFillIcon height='1em' className='size-7 sm:size-8' />
-              </button>
+              </IconButton>
               <div className='flex items-center gap-3 sm:gap-4'>
                 <UserAvatar name={userName} avatar={user?.avatar ?? null} />
                 <p className='hidden text-lg font-semibold leading-8 tracking-tight text-white md:block'>

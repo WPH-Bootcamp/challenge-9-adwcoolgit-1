@@ -1,4 +1,5 @@
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/shared/button';
+import { ChipButton } from '@/components/shared/chip-button';
 import type { DiscoveryState } from '@/types/domain';
 
 interface DiscoveryFilterBarProps {
@@ -8,15 +9,6 @@ interface DiscoveryFilterBarProps {
   onCategoryChange: (value: string) => void;
   onRatingChange: (value: string) => void;
   onReset: () => void;
-}
-
-function buildChipClassName(isActive: boolean) {
-  return cn(
-    'rounded-full border px-4 py-2 text-base leading-[30px] tracking-[var(--tracking-tight)] transition-colors',
-    isActive
-      ? 'border-(--color-primary) bg-[#FFECEC] font-bold text-(--color-primary)'
-      : 'border-(--color-neutral-300) bg-white font-semibold text-(--color-neutral-950)'
-  );
 }
 
 export function DiscoveryFilterBar({
@@ -41,47 +33,51 @@ export function DiscoveryFilterBar({
           </p>
         </div>
         {hasActiveFilters ? (
-          <button
+          <Button
             type='button'
+            variant='text'
+            size='text'
             onClick={onReset}
             disabled={isBusy}
-            className='text-sm font-bold leading-6 text-(--color-primary) disabled:opacity-60'
+            className='text-sm font-bold leading-6 lg:text-sm lg:leading-6'
           >
             Reset filters
-          </button>
+          </Button>
         ) : null}
       </div>
 
       <div className='flex flex-wrap items-center gap-3'>
-        <button
+        <ChipButton
           type='button'
+          active={!state.category}
           onClick={() => onCategoryChange('')}
           disabled={isBusy}
-          className={buildChipClassName(!state.category)}
+          className='py-2 leading-[30px]'
         >
           All Categories
-        </button>
+        </ChipButton>
         {categoryOptions.map((category) => (
-          <button
+          <ChipButton
             key={category}
             type='button'
+            active={state.category === category}
             onClick={() => onCategoryChange(category)}
             disabled={isBusy}
-            className={buildChipClassName(state.category === category)}
+            className='py-2 leading-[30px]'
           >
             {category}
-          </button>
+          </ChipButton>
         ))}
-        <button
+        <ChipButton
           type='button'
+          active={state.rating === '4.5'}
           onClick={() => onRatingChange(state.rating === '4.5' ? '' : '4.5')}
           disabled={isBusy}
-          className={buildChipClassName(state.rating === '4.5')}
+          className='py-2 leading-[30px]'
         >
           Rating 4.5+
-        </button>
+        </ChipButton>
       </div>
     </div>
   );
 }
-

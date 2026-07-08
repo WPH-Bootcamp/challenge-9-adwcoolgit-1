@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+import { PaginationDotButton } from '@/components/shared/pagination-dot-button';
 import { passthroughLoader } from '@/features/home/constants';
 
 interface RestaurantImageGalleryProps {
@@ -14,10 +15,12 @@ function GalleryTile({
   src,
   alt,
   className,
+  priority = false,
 }: {
   src: string | null;
   alt: string;
   className: string;
+  priority?: boolean;
 }) {
   return (
     <div className={className}>
@@ -28,6 +31,7 @@ function GalleryTile({
           src={src}
           alt={alt}
           fill
+          priority={priority}
           sizes='(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw'
           className='object-cover'
         />
@@ -63,21 +67,18 @@ export function RestaurantImageGallery({
           src={mobileImage}
           alt={`${restaurantName} gallery image ${activeMobileIndex + 1}`}
           className='relative aspect-[361/260] w-full overflow-hidden rounded-2xl'
+          priority={activeMobileIndex === 0}
         />
         {mobileDotCount > 1 ? (
           <div className='flex items-center justify-center gap-1.5'>
             {Array.from({ length: mobileDotCount }, (_, index) => (
-              <button
+              <PaginationDotButton
                 key={`${restaurantName}-gallery-dot-${index}`}
                 type='button'
+                active={index === activeMobileIndex}
                 aria-label={`Show gallery image ${index + 1}`}
                 aria-pressed={index === activeMobileIndex}
                 onClick={() => setMobileIndex(index)}
-                className={
-                  index === activeMobileIndex
-                    ? 'h-2 w-5 rounded-full bg-(--color-primary)'
-                    : 'size-2 rounded-full bg-neutral-300'
-                }
               />
             ))}
           </div>
@@ -89,6 +90,7 @@ export function RestaurantImageGallery({
           src={primaryImage}
           alt={`${restaurantName} main gallery`}
           className='relative h-64 overflow-hidden rounded-2xl sm:h-80 lg:h-117.5 lg:w-162.75'
+          priority
         />
         <div className='flex flex-1 flex-col gap-3 sm:gap-4 md:gap-5'>
           <GalleryTile

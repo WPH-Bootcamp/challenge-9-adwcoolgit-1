@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/shared/button';
+import { ChipButton } from '@/components/shared/chip-button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
 import { LoadingState } from '@/components/shared/loading-state';
@@ -175,7 +176,7 @@ export function RestaurantDetailPage({
       />
 
       <div className='mx-auto flex max-w-360 flex-col gap-4 py-4 sm:gap-10 sm:py-8 lg:gap-12 lg:py-12'>
-        <div className='mx-auto w-full max-w-[393px] px-4 sm:max-w-300 sm:px-6 md:px-8 lg:px-0'>
+        <div className='mx-auto w-full max-w-98.25 px-4 sm:max-w-300 sm:px-6 md:px-8 lg:px-0'>
           {!hasHydrated || detailQuery.isLoading ? (
             <LoadingState
               title='Loading restaurant details'
@@ -196,7 +197,7 @@ export function RestaurantDetailPage({
 
                 <div className='flex items-start justify-between gap-4 sm:items-center lg:flex-row lg:justify-between'>
                   <div className='flex min-w-0 items-center gap-2 sm:gap-4'>
-                    <div className='relative size-[90px] shrink-0 overflow-hidden rounded-full bg-white shadow-[0_0_10px_rgba(203,202,202,0.25)] sm:size-30'>
+                    <div className='relative size-22.5 shrink-0 overflow-hidden rounded-full bg-white shadow-[0_0_10px_rgba(203,202,202,0.25)] sm:size-30'>
                       {restaurant.imageUrl || restaurant.galleryImages[0] ? (
                         <Image
                           loader={passthroughLoader}
@@ -218,11 +219,14 @@ export function RestaurantDetailPage({
                       )}
                     </div>
                     <div className='flex min-w-0 flex-1 flex-col gap-0.5 text-neutral-950'>
-                      <h1 className='text-md font-extrabold leading-[30px] tracking-tight sm:text-display-md sm:leading-10.5'>
+                      <h1 className='text-md font-extrabold leading-7.5 tracking-tight sm:text-display-md sm:leading-10.5'>
                         {restaurant.name}
                       </h1>
                       <div className='flex items-center gap-1 text-[#FDB022]'>
-                        <Star className='size-6 fill-current' strokeWidth={1.5} />
+                        <Star
+                          className='size-6 fill-current'
+                          strokeWidth={1.5}
+                        />
                         <span className='text-sm font-medium leading-7 tracking-tight text-neutral-950 sm:text-lg sm:leading-8'>
                           {averageRating ? averageRating.toFixed(1) : 'New'}
                         </span>
@@ -233,7 +237,7 @@ export function RestaurantDetailPage({
                         </span>
                         {distanceLabel ? (
                           <>
-                            <span className='size-[2px] rounded-full bg-neutral-950' />
+                            <span className='size-0.5 rounded-full bg-neutral-950' />
                             <span>{distanceLabel}</span>
                           </>
                         ) : null}
@@ -282,7 +286,7 @@ export function RestaurantDetailPage({
 
                 {filteredMenus.length > 0 ? (
                   <>
-                    <div className='grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4'>
+                    <div className='grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:grid-cols-4'>
                       {visibleMenus.map((menu) => {
                         const cartItem = cartSelection[String(menu.id)];
                         const quantity = cartItem?.quantity ?? 0;
@@ -336,7 +340,10 @@ export function RestaurantDetailPage({
                     Review
                   </h2>
                   <div className='flex items-center gap-1 text-[#FDB022]'>
-                    <Star className='size-5 fill-current sm:size-6' strokeWidth={1.5} />
+                    <Star
+                      className='size-5 fill-current sm:size-6'
+                      strokeWidth={1.5}
+                    />
                     <span className='text-sm font-medium leading-7 tracking-tight text-neutral-950 sm:text-lg sm:leading-8'>
                       {averageRating ? averageRating.toFixed(1) : 'New'} (
                       {formatReviewCount(restaurant.totalReviews)})
@@ -382,7 +389,7 @@ export function RestaurantDetailPage({
         </div>
       </div>
 
-      <HomeFooter />
+      <HomeFooter variant='detail' />
     </main>
   );
 }
@@ -397,16 +404,8 @@ function MenuChip({
   onClick: () => void;
 }) {
   return (
-    <button
-      type='button'
-      onClick={onClick}
-      className={
-        isActive
-          ? 'h-10 rounded-full border border-(--color-primary) bg-[#FFECEC] px-4 text-sm font-bold leading-7 tracking-tight text-(--color-primary) sm:text-base sm:leading-7.5'
-          : 'h-10 rounded-full border border-neutral-300 bg-white px-4 text-sm font-semibold leading-7 tracking-tight text-neutral-950 sm:text-base sm:leading-7.5'
-      }
-    >
+    <ChipButton type='button' active={isActive} onClick={onClick}>
       {label}
-    </button>
+    </ChipButton>
   );
 }

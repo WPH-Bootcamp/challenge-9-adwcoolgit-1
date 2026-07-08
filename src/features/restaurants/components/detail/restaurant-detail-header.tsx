@@ -24,7 +24,7 @@ export function RestaurantDetailHeader({
     <header className="border-b border-neutral-300 bg-white shadow-[0_0_10px_rgba(203,202,202,0.25)]">
       <div className="mx-auto flex h-16 max-w-360 items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6 md:px-8 lg:px-16 xl:px-[120px]">
         <Link href="/" aria-label="Foody home">
-          <FoodyLogo surface="light" />
+          <FoodyLogo surface="light" priority />
         </Link>
 
         {isAuthenticated ? (
@@ -101,3 +101,4 @@ function UserAvatar({ name, avatar }: { name: string; avatar: string | null }) {
     </div>
   );
 }
+
