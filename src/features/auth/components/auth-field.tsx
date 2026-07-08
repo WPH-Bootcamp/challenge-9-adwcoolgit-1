@@ -74,7 +74,7 @@ export function AuthInputField({
 
   return (
     <label
-      className={`box-border flex h-14 w-full items-center gap-8 self-stretch rounded-[10px] border bg-white px-3 ${error ? 'border-(--color-primary)' : 'border--300'} ${isFocused && !error ? 'shadow-[0_1px_2px_rgba(16,24,40,0.04)]' : ''}`}
+      className={`box-border flex h-14 w-full items-center gap-8 self-stretch rounded-[10px] border border-neutral-300 bg-white px-3 ${error ? 'border-(--color-primary)' : 'border--300'} ${isFocused && !error ? 'shadow-[0_1px_2px_rgba(16,24,40,0.04)]' : ''}`}
     >
       <div className='flex h-11.5 my-auto min-w-0 flex-1 flex-col justify-center self-stretch'>
         {isActive && (
@@ -88,7 +88,7 @@ export function AuthInputField({
           autoComplete={autoComplete}
           aria-label={label}
           aria-invalid={Boolean(error)}
-          className='auth-input flex h-7.5 w-full min-w-0 border-none bg-transparent p-0 text-left text-[16px] font-semibold leading-7.5 tracking-tight my-auto text-(--color-neutral-950) outline-none'
+          className='auth-input flex h-7.5 w-full min-w-0 border-none bg-transparent p-0 text-left text-[16px] font-semibold leading-7.5 tracking-tight my-auto text-neutral-950 outline-none'
           {...registration}
           ref={(element) => {
             inputRef.current = element;
@@ -172,7 +172,7 @@ export function CheckboxField({
   return (
     <div className='flex flex-col gap-1'>
       <label className='flex cursor-pointer items-center gap-2 text-[16px] font-normal leading-7.5 tracking-tight text-(--color-neutral-950)'>
-        <span className='relative flex h-4 w-4 flex-none items-center justify-center'>
+        <span className='relative flex h-5 w-5 flex-none items-center justify-center'>
           <input
             type='checkbox'
             checked={checked}
@@ -180,7 +180,7 @@ export function CheckboxField({
             className='absolute inset-0 cursor-pointer opacity-0'
           />
           <span
-            className={`flex h-4 w-4 items-center justify-center rounded-1 border transition-colors ${checked ? 'border-(--color-primary) bg-(--color-primary)' : 'border-neutral-300 bg-white'}`}
+            className={`flex h-5 w-5 items-center justify-center rounded-sm border transition-colors ${checked ? 'border-(--color-primary) bg-(--color-primary)' : 'border-[#D5D7DA] bg-white'}`}
           >
             {checked ? (
               <Image

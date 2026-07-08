@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { LinkButton } from '@/components/shared/button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
-import { LoadingState } from '@/components/shared/loading-state';
+import { CheckoutContentSkeleton, CheckoutPageSkeleton } from '@/components/shared/page-skeletons';
 import { getApiErrorMessage, useSessionState } from '@/features/auth/hooks';
 import { useCartQuery, useUpdateCartItemQuantity } from '@/features/cart/hooks';
 import { HomeFooter } from '@/features/home/components/home-footer';
@@ -105,12 +105,7 @@ export function CheckoutPage() {
   if (!hasHydrated || (!isAuthenticated && !cartQuery.data)) {
     return (
       <main className='min-h-screen bg-white'>
-        <div className='mx-auto flex min-h-screen max-w-300 items-center justify-center px-4'>
-          <LoadingState
-            title='Preparing checkout'
-            description='Checking your session and loading the latest basket data.'
-          />
-        </div>
+        <CheckoutPageSkeleton />
       </main>
     );
   }
@@ -129,10 +124,7 @@ export function CheckoutPage() {
         </h1>
 
         {cartQuery.isLoading ? (
-          <LoadingState
-            title='Loading checkout details'
-            description='Preparing your grouped basket and payment summary.'
-          />
+          <CheckoutContentSkeleton />
         ) : cartQuery.isError ? (
           <ErrorState
             title='Unable to load checkout'
@@ -209,3 +201,5 @@ function buildPaymentSuccessUrl(order: OrderRecord) {
 
   return `/checkout/success?${params.toString()}`;
 }
+
+

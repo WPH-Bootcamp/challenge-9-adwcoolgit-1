@@ -11,7 +11,7 @@ import { Button, LinkButton } from '@/components/shared/button';
 import { ChipButton } from '@/components/shared/chip-button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
-import { LoadingState } from '@/components/shared/loading-state';
+import { RestaurantDetailPageSkeleton } from '@/components/shared/page-skeletons';
 import { getApiErrorMessage, useSessionState } from '@/features/auth/hooks';
 import { HomeFooter } from '@/features/home/components/home-footer';
 import { passthroughLoader } from '@/features/home/constants';
@@ -198,10 +198,7 @@ export function RestaurantDetailPage({
       <div className='mx-auto flex max-w-360 flex-col gap-4 py-4 pb-28 sm:gap-10 sm:py-8 sm:pb-32 lg:gap-12 lg:py-12 lg:pb-40'>
         <div className='mx-auto w-full max-w-98.25 px-4 sm:max-w-300 sm:px-6 md:px-8 lg:px-0'>
           {!hasHydrated || detailQuery.isLoading ? (
-            <LoadingState
-              title='Loading restaurant details'
-              description='Preparing the menu, gallery, and review information for you.'
-            />
+            <RestaurantDetailPageSkeleton />
           ) : detailQuery.isError || !restaurant ? (
             <ErrorState
               title='Unable to load this restaurant'
@@ -456,6 +453,7 @@ function MenuChip({
     </ChipButton>
   );
 }
+
 
 
 

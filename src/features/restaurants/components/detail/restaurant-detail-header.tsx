@@ -51,14 +51,14 @@ export function RestaurantDetailHeader({
             <LinkButton
               href='/login'
               variant='neutralOutline'
-              className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
+              className='h-10 w-27 text-sm sm:h-12 sm:w-40.75 sm:text-base'
             >
               Sign in
             </LinkButton>
             <LinkButton
               href='/register'
               variant='primary'
-              className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
+              className='h-10 w-27 text-sm sm:h-12 sm:w-40.75 sm:text-base bg-black! text-white!'
             >
               Sign up
             </LinkButton>

@@ -5,7 +5,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/shared/button';
 import { useSessionState } from '@/features/auth/hooks';
-import { HomeCategoryStrip } from '@/features/home/components/home-category-strip';
+import {
+  HomeCategoryStrip,
+  type HomeCategoryKey,
+} from '@/features/home/components/home-category-strip';
 import { HomeFooter } from '@/features/home/components/home-footer';
 import { HomeHero } from '@/features/home/components/home-hero';
 import { HomeRestaurantCard } from '@/features/home/components/home-restaurant-card';
@@ -19,7 +22,9 @@ import {
   serializeDiscoveryState,
 } from '@/features/restaurants/discovery-state';
 import {
+  useBestSellerFeed,
   useDiscoveryRestaurantFeed,
+  useNearbyFeed,
   useRecommendedFeed,
   useRestaurantFeed,
 } from '@/features/restaurants/hooks';
@@ -38,7 +43,11 @@ export default function HomePage() {
   const allRestaurantsQuery = useRestaurantFeed(24);
   const discoveryQuery = useDiscoveryRestaurantFeed(discoveryState);
   const recommendedQuery = useRecommendedFeed();
+  const bestSellerQuery = useBestSellerFeed(12);
+  const nearbyQuery = useNearbyFeed(12);
   const [recommendedVisibleCount, setRecommendedVisibleCount] = useState(12);
+  const [activeCategory, setActiveCategory] =
+    useState<HomeCategoryKey>('all');
 
   const recommendedRestaurants = useMemo(
     () =>
@@ -56,6 +65,15 @@ export default function HomePage() {
   const visibleRecommendedRestaurants = recommendedRestaurants.slice(
     0,
     recommendedVisibleCount
+  );
+  const lunchRestaurants = useMemo(
+    () =>
+      (allRestaurantsQuery.data?.restaurants ?? []).filter((restaurant) =>
+        restaurant.categories.some(
+          (category) => category.toLowerCase() === 'lunch'
+        )
+      ),
+    [allRestaurantsQuery.data?.restaurants]
   );
   const categoryOptions = useMemo(() => {
     const allCategories = new Set<string>();
@@ -87,7 +105,13 @@ export default function HomePage() {
     isDiscoveryActive && discoveryLimit < discoveryTotal;
   const canShowMoreRecommended =
     !isDiscoveryActive &&
+    activeCategory === 'all' &&
     recommendedVisibleCount < recommendedRestaurants.length;
+  const hasSavedLocation =
+    user?.latitude !== null &&
+    user?.latitude !== undefined &&
+    user?.longitude !== null &&
+    user?.longitude !== undefined;
 
   function replaceDiscoveryState(queryString: string) {
     startTransition(() => {
@@ -98,14 +122,23 @@ export default function HomePage() {
   }
 
   function handleDiscoveryPatch(patch: Partial<typeof defaultDiscoveryState>) {
+    setActiveCategory('all');
     const nextState = mergeDiscoveryState(discoveryState, patch);
     replaceDiscoveryState(serializeDiscoveryState(nextState));
   }
 
   function handleSearchSubmit(value: string) {
+    setActiveCategory('all');
     const nextQuery = value.trim();
+    const hasOtherFilters = Boolean(
+      discoveryState.category ||
+        discoveryState.rating ||
+        discoveryState.priceMin ||
+        discoveryState.priceMax ||
+        discoveryState.range
+    );
 
-    if (!nextQuery && !discoveryState.category && !discoveryState.rating) {
+    if (!nextQuery && !hasOtherFilters) {
       replaceDiscoveryState('');
       return;
     }
@@ -113,21 +146,46 @@ export default function HomePage() {
     handleDiscoveryPatch({ q: nextQuery });
   }
 
+  function handleCategorySelect(category: HomeCategoryKey) {
+    setActiveCategory(category);
+
+    if (isDiscoveryActive) {
+      replaceDiscoveryState('');
+    }
+  }
+
+  const curatedSection = getCuratedSection({
+    activeCategory,
+    isAuthenticated,
+    hasSavedLocation,
+    recommendedRestaurants: visibleRecommendedRestaurants,
+    recommendedTotal: recommendedRestaurants.length,
+    nearbyRestaurants: nearbyQuery.data ?? [],
+    bestSellerRestaurants: bestSellerQuery.data?.restaurants ?? [],
+    lunchRestaurants,
+    allRestaurantsLoading: allRestaurantsQuery.isLoading,
+    allRestaurantsError: allRestaurantsQuery.isError,
+    recommendedError: recommendedQuery.isError,
+    bestSellerLoading: bestSellerQuery.isLoading,
+    bestSellerError: bestSellerQuery.isError,
+    nearbyLoading: nearbyQuery.isLoading,
+    nearbyError: nearbyQuery.isError,
+  });
+
   const sectionTitle = isDiscoveryActive
     ? discoveryState.q
       ? 'Search Results'
       : 'Explore Restaurants'
-    : 'Recommended';
+    : curatedSection.title;
   const sectionRestaurants = isDiscoveryActive
     ? (discoveryQuery.data?.restaurants ?? [])
-    : visibleRecommendedRestaurants;
+    : curatedSection.restaurants;
   const isSectionLoading = isDiscoveryActive
     ? discoveryQuery.isLoading
-    : allRestaurantsQuery.isLoading;
+    : curatedSection.isLoading;
   const hasSectionError = isDiscoveryActive
     ? discoveryQuery.isError
-    : allRestaurantsQuery.isError ||
-      (recommendedQuery.isError && isAuthenticated);
+    : curatedSection.isError;
 
   return (
     <main className='min-h-screen bg-white'>
@@ -139,7 +197,10 @@ export default function HomePage() {
       />
 
       <div className='mx-auto flex max-w-300 flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-10 md:px-8 lg:gap-12 lg:px-0 lg:py-12'>
-        <HomeCategoryStrip />
+        <HomeCategoryStrip
+          activeCategory={activeCategory}
+          onSelect={handleCategorySelect}
+        />
 
         <DiscoveryFilterBar
           categoryOptions={categoryOptions}
@@ -157,36 +218,38 @@ export default function HomePage() {
             <h2 className='text-[28px] font-extrabold leading-9.5 text-(--color-neutral-950) lg:text-[32px] lg:leading-10.5'>
               {sectionTitle}
             </h2>
-            <Button
-              type='button'
-              variant='text'
-              size='text'
-              onClick={() => {
-                if (isDiscoveryActive) {
-                  handleDiscoveryPatch({
-                    page: '1',
-                    limit: String(discoveryTotal || discoveryLimit),
-                  });
-                  return;
-                }
+            {isDiscoveryActive || activeCategory === 'all' ? (
+              <Button
+                type='button'
+                variant='text'
+                size='text'
+                onClick={() => {
+                  if (isDiscoveryActive) {
+                    handleDiscoveryPatch({
+                      page: '1',
+                      limit: String(discoveryTotal || discoveryLimit),
+                    });
+                    return;
+                  }
 
-                setRecommendedVisibleCount(recommendedRestaurants.length);
-              }}
-              className='font-extrabold'
-            >
-              See All
-            </Button>
+                  setRecommendedVisibleCount(recommendedRestaurants.length);
+                }}
+                className='font-extrabold'
+              >
+                See All
+              </Button>
+            ) : null}
           </div>
 
           {isSectionLoading ? (
             <RecommendationMessage
               title={
-                isDiscoveryActive ? 'Loading restaurants' : 'Loading discovery'
+                isDiscoveryActive ? 'Loading restaurants' : curatedSection.loadingTitle
               }
               description={
                 isDiscoveryActive
                   ? 'Applying your search and filters to the restaurant list.'
-                  : 'Fetching restaurants and curated sections for your next meal.'
+                  : curatedSection.loadingDescription
               }
             />
           ) : hasSectionError ? (
@@ -194,9 +257,13 @@ export default function HomePage() {
               title={
                 isDiscoveryActive
                   ? 'Unable to load filtered restaurants'
-                  : 'Unable to load restaurants'
+                  : curatedSection.errorTitle
               }
-              description='We could not load the restaurant data right now. Please try again in a moment.'
+              description={
+                isDiscoveryActive
+                  ? 'We could not load the restaurant data right now. Please try again in a moment.'
+                  : curatedSection.errorDescription
+              }
               tone='error'
             />
           ) : sectionRestaurants.length === 0 ? (
@@ -204,12 +271,12 @@ export default function HomePage() {
               title={
                 isDiscoveryActive
                   ? 'No restaurants match your filters'
-                  : 'No recommendations yet'
+                  : curatedSection.emptyTitle
               }
               description={
                 isDiscoveryActive
                   ? 'Try a different keyword or reset your category and rating filters.'
-                  : 'Restaurant recommendations are not available right now.'
+                  : curatedSection.emptyDescription
               }
             />
           ) : (
@@ -303,3 +370,105 @@ function getRecommendedRestaurants({
   return allRestaurants;
 }
 
+function getCuratedSection({
+  activeCategory,
+  isAuthenticated,
+  hasSavedLocation,
+  recommendedRestaurants,
+  recommendedTotal,
+  nearbyRestaurants,
+  bestSellerRestaurants,
+  lunchRestaurants,
+  allRestaurantsLoading,
+  allRestaurantsError,
+  recommendedError,
+  bestSellerLoading,
+  bestSellerError,
+  nearbyLoading,
+  nearbyError,
+}: {
+  activeCategory: HomeCategoryKey;
+  isAuthenticated: boolean;
+  hasSavedLocation: boolean;
+  recommendedRestaurants: RestaurantCard[];
+  recommendedTotal: number;
+  nearbyRestaurants: RestaurantCard[];
+  bestSellerRestaurants: RestaurantCard[];
+  lunchRestaurants: RestaurantCard[];
+  allRestaurantsLoading: boolean;
+  allRestaurantsError: boolean;
+  recommendedError: boolean;
+  bestSellerLoading: boolean;
+  bestSellerError: boolean;
+  nearbyLoading: boolean;
+  nearbyError: boolean;
+}) {
+  switch (activeCategory) {
+    case 'nearby':
+      return {
+        title: 'Nearby Restaurants',
+        restaurants: nearbyRestaurants,
+        isLoading: nearbyLoading,
+        isError: nearbyError,
+        loadingTitle: 'Loading nearby restaurants',
+        loadingDescription: 'Looking for restaurants around your saved location.',
+        errorTitle: 'Unable to load nearby restaurants',
+        errorDescription:
+          'We could not load nearby restaurants right now. Please try again in a moment.',
+        emptyTitle: isAuthenticated && hasSavedLocation
+          ? 'No nearby restaurants found'
+          : 'Nearby requires your saved location',
+        emptyDescription: isAuthenticated && hasSavedLocation
+          ? 'Try another section while we wait for more nearby options.'
+          : 'Sign in and complete your location to see nearby restaurants.',
+        total: nearbyRestaurants.length,
+      };
+    case 'bestSeller':
+      return {
+        title: 'Best Seller',
+        restaurants: bestSellerRestaurants,
+        isLoading: bestSellerLoading,
+        isError: bestSellerError,
+        loadingTitle: 'Loading best sellers',
+        loadingDescription: 'Fetching the most popular restaurants right now.',
+        errorTitle: 'Unable to load best sellers',
+        errorDescription:
+          'We could not load the best seller list right now. Please try again in a moment.',
+        emptyTitle: 'No best sellers yet',
+        emptyDescription: 'Best seller restaurants are not available right now.',
+        total: bestSellerRestaurants.length,
+      };
+    case 'lunch':
+      return {
+        title: 'Lunch Picks',
+        restaurants: lunchRestaurants,
+        isLoading: allRestaurantsLoading,
+        isError: allRestaurantsError,
+        loadingTitle: 'Loading lunch picks',
+        loadingDescription: 'Finding restaurants that match your lunch craving.',
+        errorTitle: 'Unable to load lunch picks',
+        errorDescription:
+          'We could not load lunch restaurants right now. Please try again in a moment.',
+        emptyTitle: 'No lunch restaurants found',
+        emptyDescription: 'Try another section while we wait for more lunch options.',
+        total: lunchRestaurants.length,
+      };
+    case 'all':
+    default:
+      return {
+        title: 'Recommended',
+        restaurants: recommendedRestaurants,
+        isLoading: allRestaurantsLoading,
+        isError: allRestaurantsError || (recommendedError && isAuthenticated),
+        loadingTitle: 'Loading discovery',
+        loadingDescription:
+          'Fetching restaurants and curated sections for your next meal.',
+        errorTitle: 'Unable to load restaurants',
+        errorDescription:
+          'We could not load the restaurant data right now. Please try again in a moment.',
+        emptyTitle: 'No recommendations yet',
+        emptyDescription: 'Restaurant recommendations are not available right now.',
+        total: recommendedTotal,
+      };
+  }
+}

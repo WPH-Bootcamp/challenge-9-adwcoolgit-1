@@ -3,13 +3,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 
 import { eyeIconUrl, eyeOffIconUrl } from '@/features/auth/constants';
 import {
   AuthInputField,
   AuthTrailingButton,
-  CheckboxField,
   FieldError,
 } from '@/features/auth/components/auth-field';
 import { AuthFeedback } from '@/features/auth/components/auth-feedback';
@@ -37,11 +36,6 @@ export function RegisterForm({ redirectTo }: RegisterFormProps) {
       confirmPassword: '',
       rememberMe: true,
     },
-  });
-
-  const rememberMe = useWatch({
-    control: form.control,
-    name: 'rememberMe',
   });
 
   async function onSubmit(values: RegisterValues) {
@@ -132,16 +126,6 @@ export function RegisterForm({ redirectTo }: RegisterFormProps) {
         />
         <FieldError message={form.formState.errors.confirmPassword?.message} />
       </div>
-      <CheckboxField
-        checked={rememberMe ?? true}
-        onChange={(value) =>
-          form.setValue('rememberMe', value, {
-            shouldDirty: true,
-            shouldTouch: true,
-          })
-        }
-        label='Remember Me'
-      />
       <AuthFeedback message={formError} />
       <AuthSubmitButton
         isPending={mutation.isPending}

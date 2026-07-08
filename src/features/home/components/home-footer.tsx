@@ -146,7 +146,9 @@ function FooterRow({
       <p
         className={cn(
           'text-center font-normal text-sm leading-6.75 md:text-base md:leading-7.5 text-(--color-neutral-25)',
-          isTitle ? 'font-extrabold' : 'font-normal tracking-tight'
+          isTitle
+            ? 'font-extrabold'
+            : 'font-normal tracking-tight cursor-pointer'
         )}
       >
         {label}

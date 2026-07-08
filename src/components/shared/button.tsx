@@ -13,7 +13,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        outline: 'border-2 border-neutral-300 bg-transparent text-white',
+        outline:
+          'border-2 border-neutral-300 bg-transparent text-white visited:text-white hover:text-white',
         solid: 'bg-white text-neutral-950',
         primary:
           'bg-(--color-primary) text-white visited:text-white hover:text-white',
@@ -85,4 +86,3 @@ export function LinkButton({
 }
 
 export { buttonVariants };
-

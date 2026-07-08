@@ -1,10 +1,11 @@
 'use client';
 
-import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { FileText, LogOut, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+import { UserAvatar } from '@/components/shared/user-avatar';
 import { cn } from '@/lib/utils';
 import { clearAuthSession } from '@/store/auth-store';
 
@@ -45,6 +46,11 @@ export function AuthUserMenu({
     };
   }, []);
 
+  function handleProfileClick() {
+    setIsOpen(false);
+    router.push('/profile');
+  }
+
   function handleOrdersClick() {
     setIsOpen(false);
     router.push('/orders');
@@ -61,15 +67,31 @@ export function AuthUserMenu({
       <button
         type='button'
         onClick={() => setIsOpen((current) => !current)}
-        className='md:hidden cursor-pointer'
+        className='cursor-pointer md:hidden'
         aria-label='Open user menu'
         aria-expanded={isOpen}
       >
-        <UserAvatar name={name} avatar={avatar} />
+        <UserAvatar
+          name={name}
+          avatar={avatar}
+          className='size-10 sm:size-12'
+          textClassName='text-sm leading-7 sm:text-base sm:leading-[30px]'
+          sizes='48px'
+        />
       </button>
 
-      <div className='hidden md:flex md:items-center md:gap-3 sm:gap-4'>
-        <UserAvatar name={name} avatar={avatar} />
+      <Link
+        href='/profile'
+        aria-label='Open profile page'
+        className='hidden cursor-pointer items-center md:flex md:gap-3 sm:gap-4'
+      >
+        <UserAvatar
+          name={name}
+          avatar={avatar}
+          className='size-10 sm:size-12'
+          textClassName='text-sm leading-7 sm:text-base sm:leading-[30px]'
+          sizes='48px'
+        />
         <p
           className={cn(
             'text-lg font-semibold leading-8 tracking-tight',
@@ -78,13 +100,19 @@ export function AuthUserMenu({
         >
           {name}
         </p>
-      </div>
+      </Link>
 
       {isOpen ? (
         <div className='absolute right-0 top-[calc(100%+12px)] z-50 w-[190px] rounded-[16px] bg-white p-4 shadow-[0_0_10px_rgba(203,202,202,0.25)] md:hidden'>
           <div className='flex flex-col gap-3'>
             <div className='flex items-center gap-2'>
-              <UserAvatar name={name} avatar={avatar} compact />
+              <UserAvatar
+                name={name}
+                avatar={avatar}
+                className='size-9'
+                textClassName='text-sm leading-7'
+                sizes='36px'
+              />
               <p className='text-base font-bold leading-7.5 tracking-tight text-neutral-950'>
                 {name}
               </p>
@@ -92,15 +120,19 @@ export function AuthUserMenu({
 
             <div className='h-px w-full bg-neutral-200' />
 
-            <div className='flex items-center gap-2 text-neutral-950'>
+            <button
+              type='button'
+              onClick={handleProfileClick}
+              className='flex cursor-pointer items-center gap-2 text-neutral-950'
+            >
               <MapPin className='size-5' strokeWidth={2} />
               <span className='text-sm font-medium leading-7'>Delivery Address</span>
-            </div>
+            </button>
 
             <button
               type='button'
               onClick={handleOrdersClick}
-              className='flex items-center gap-2 text-neutral-900 cursor-pointer'
+              className='flex cursor-pointer items-center gap-2 text-neutral-900'
             >
               <FileText className='size-5' strokeWidth={2} />
               <span className='text-sm font-medium leading-7'>My Orders</span>
@@ -109,7 +141,7 @@ export function AuthUserMenu({
             <button
               type='button'
               onClick={handleLogoutClick}
-              className='flex items-center gap-2 text-neutral-950 cursor-pointer'
+              className='flex cursor-pointer items-center gap-2 text-neutral-950'
             >
               <LogOut className='size-5' strokeWidth={2} />
               <span className='text-sm font-medium leading-7'>Logout</span>
@@ -119,58 +151,4 @@ export function AuthUserMenu({
       ) : null}
     </div>
   );
-}
-
-function UserAvatar({
-  name,
-  avatar,
-  compact = false,
-}: {
-  name: string;
-  avatar: string | null;
-  compact?: boolean;
-}) {
-  const sizeClassName = compact ? 'size-9' : 'size-10 sm:size-12';
-  const textClassName = compact
-    ? 'text-sm leading-7'
-    : 'text-sm leading-7 sm:text-base sm:leading-[30px]';
-
-  if (avatar) {
-    return (
-      <div className={cn('relative overflow-hidden rounded-full', sizeClassName)}>
-        <Image
-          loader={passthroughLoader}
-          unoptimized
-          src={avatar}
-          alt={name}
-          fill
-          sizes={compact ? '36px' : '48px'}
-          className='object-cover'
-        />
-      </div>
-    );
-  }
-
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((value) => value[0]?.toUpperCase())
-    .join('');
-
-  return (
-    <div
-      className={cn(
-        'flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#fdb022_0%,#c12116_100%)] font-bold tracking-tight text-white',
-        sizeClassName,
-        textClassName
-      )}
-    >
-      {initials || 'JD'}
-    </div>
-  );
-}
-
-function passthroughLoader({ src }: { src: string }) {
-  return src;
 }

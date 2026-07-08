@@ -2,8 +2,10 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
-interface IconButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className'> {
+interface IconButtonProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'children' | 'className'
+> {
   variant?: 'outline' | 'primary' | 'ghost';
   children: ReactNode;
   className?: string;
@@ -24,7 +26,7 @@ export function IconButton({
           ? 'bg-(--color-primary) text-white hover:opacity-90'
           : variant === 'ghost'
             ? 'bg-transparent text-current hover:opacity-80'
-            : 'border border-(--color-neutral-300) text-(--color-neutral-950) hover:bg-(--color-neutral-100)',
+            : 'border border-neutral-300 text-neutral-950 hover:bg-neutral-100',
         className
       )}
     >

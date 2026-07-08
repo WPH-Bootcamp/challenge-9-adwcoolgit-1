@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
-import { LoadingState } from '@/components/shared/loading-state';
+import { OrderHistoryContentSkeleton, OrderHistoryPageSkeleton } from '@/components/shared/page-skeletons';
 import { useSessionState } from '@/features/auth/hooks';
 import { useCartQuery } from '@/features/cart/hooks';
 import { HomeFooter } from '@/features/home/components/home-footer';
@@ -38,12 +38,7 @@ export function OrderHistoryPage() {
   if (!hasHydrated || (!isAuthenticated && !orderHistoryQuery.data)) {
     return (
       <main className='min-h-screen bg-(--color-neutral-50)'>
-        <div className='mx-auto flex min-h-screen max-w-300 items-center justify-center px-4'>
-          <LoadingState
-            title='Preparing your orders'
-            description='Checking your session and loading order history.'
-          />
-        </div>
+        <OrderHistoryPageSkeleton />
       </main>
     );
   }
@@ -76,10 +71,7 @@ export function OrderHistoryPage() {
                   />
 
                   {orderHistoryQuery.isLoading ? (
-                    <LoadingState
-                      title='Loading order history'
-                      description='Preparing your latest purchase records.'
-                    />
+                    <OrderHistoryContentSkeleton />
                   ) : orderHistoryQuery.isError ? (
                     <ErrorState
                       title='Unable to load your orders'
@@ -119,3 +111,5 @@ export function OrderHistoryPage() {
     </>
   );
 }
+
+

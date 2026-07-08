@@ -43,7 +43,7 @@ export function HomeHero({
         <div className='absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_59.976%,rgba(0,0,0,0.8)_110.09%)]' />
       </div>
 
-      <div className='relative mx-auto flex min-h-[560px] max-w-360 flex-col px-4 pb-16 sm:min-h-[640px] sm:px-6 sm:pb-24 md:px-8 lg:min-h-[827px] lg:px-30 lg:pb-30'>
+      <div className='relative mx-auto flex min-h-140 max-w-360 flex-col px-4 pb-16 sm:min-h-160 sm:px-6 sm:pb-24 md:px-8 lg:min-h-206.75 lg:px-30 lg:pb-30'>
         <header className='flex h-16 items-center justify-between gap-3 sm:h-20 sm:gap-4'>
           <FoodyLogo surface='dark' priority />
 
@@ -68,14 +68,14 @@ export function HomeHero({
               <LinkButton
                 href='/login'
                 variant='outline'
-                className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
+                className='h-10 w-27 text-sm !text-white visited:!text-white hover:!text-white sm:h-12 sm:w-40.75 sm:text-base'
               >
                 Sign in
               </LinkButton>
               <LinkButton
                 href='/register'
                 variant='solid'
-                className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
+                className='h-10 w-27 text-sm sm:h-12 sm:w-40.75 sm:text-base'
               >
                 Sign up
               </LinkButton>

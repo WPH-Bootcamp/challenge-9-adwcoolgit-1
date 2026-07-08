@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,13 +7,20 @@ import { toast } from 'sonner';
 import { Button, LinkButton } from '@/components/shared/button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
-import { LoadingState } from '@/components/shared/loading-state';
+import {
+  CartContentSkeleton,
+  CartPageSkeleton,
+} from '@/components/shared/page-skeletons';
 import { getApiErrorMessage, useSessionState } from '@/features/auth/hooks';
 import { HomeFooter } from '@/features/home/components/home-footer';
 import { RestaurantDetailHeader } from '@/features/restaurants/components/detail/restaurant-detail-header';
 import type { BasketItem } from '@/types/domain';
 
-import { useCartQuery, useClearCart, useUpdateCartItemQuantity } from '../hooks';
+import {
+  useCartQuery,
+  useClearCart,
+  useUpdateCartItemQuantity,
+} from '../hooks';
 import { CartGroupCard } from './cart-group-card';
 
 export function CartPage() {
@@ -66,12 +73,7 @@ export function CartPage() {
   if (!hasHydrated || (!isAuthenticated && !cartQuery.data)) {
     return (
       <main className='min-h-screen bg-white'>
-        <div className='mx-auto flex min-h-screen max-w-300 items-center justify-center px-4'>
-          <LoadingState
-            title='Preparing your cart'
-            description='Checking your session and loading basket details.'
-          />
-        </div>
+        <CartPageSkeleton />
       </main>
     );
   }
@@ -110,10 +112,7 @@ export function CartPage() {
         </div>
 
         {cartQuery.isLoading ? (
-          <LoadingState
-            title='Loading your basket'
-            description='Preparing grouped items and totals for checkout.'
-          />
+          <CartContentSkeleton />
         ) : cartQuery.isError ? (
           <ErrorState
             title='Unable to load your cart'
@@ -135,8 +134,13 @@ export function CartPage() {
               title='Your cart is empty'
               description='Add menu items from a restaurant detail page to start a multi-restaurant checkout.'
             />
-            <div className='flex justify-center'>
-              <LinkButton href='/' variant='primary' className='!text-white'>
+            <div className='flex justify-center w-1/4 mx-auto'>
+              <LinkButton
+                href='/'
+                variant='primary'
+                className='text-white!'
+                size={'full'}
+              >
                 Explore Restaurants
               </LinkButton>
             </div>
@@ -159,4 +163,3 @@ export function CartPage() {
     </main>
   );
 }
-

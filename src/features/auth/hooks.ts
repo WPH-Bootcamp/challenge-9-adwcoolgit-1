@@ -1,14 +1,20 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-import { useShallow } from "zustand/react/shallow";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { useShallow } from 'zustand/react/shallow';
 
-import { login, register } from "@/lib/api/auth";
-import { queryKeys } from "@/lib/query/query-keys";
-import { useAuthStore } from "@/store/auth-store";
-import type { ApiErrorResponse, AuthCredentials, RegisterPayload } from "@/types/api";
-import { toAuthUser } from "@/types/domain";
+import {
+  buildProfileFormData,
+  login,
+  register,
+  updateProfile,
+  type UpdateProfileInput,
+} from '@/lib/api/auth';
+import { queryKeys } from '@/lib/query/query-keys';
+import { useAuthStore } from '@/store/auth-store';
+import type { ApiErrorResponse, AuthCredentials, RegisterPayload } from '@/types/api';
+import { toAuthUser } from '@/types/domain';
 
 export function getApiErrorMessage(error: unknown, fallback: string) {
   if (error instanceof AxiosError) {
@@ -18,7 +24,7 @@ export function getApiErrorMessage(error: unknown, fallback: string) {
     }
 
     if (Array.isArray(data?.errors) && data.errors.length > 0) {
-      return data.errors.join(" ");
+      return data.errors.join(' ');
     }
   }
 
@@ -63,6 +69,20 @@ export function useRegisterMutation() {
   });
 }
 
+export function useUpdateProfileMutation() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((state) => state.setUser);
+
+  return useMutation({
+    mutationFn: (payload: UpdateProfileInput) =>
+      updateProfile(buildProfileFormData(payload)),
+    onSuccess: (payload) => {
+      queryClient.setQueryData(queryKeys.auth.profile(), payload);
+      setUser(toAuthUser(payload));
+    },
+  });
+}
+
 export function useSessionUser() {
   return useAuthStore((state) => state.user);
 }
@@ -74,6 +94,6 @@ export function useSessionState() {
       isAuthenticated: state.isAuthenticated,
       hasHydrated: state.hasHydrated,
       user: state.user,
-    })),
+    }))
   );
 }

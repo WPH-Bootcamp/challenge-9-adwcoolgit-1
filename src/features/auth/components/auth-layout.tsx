@@ -21,9 +21,9 @@ export function AuthPageLayout({
 }: AuthPageLayoutProps) {
   return (
     <main className='min-h-screen bg-white'>
-      <div className='mx-auto flex min-h-screen max-w-360 flex-col lg:flex-row'>
+      <div className='mx-auto flex min-h-screen max-w-360 flex-col lg:min-h-256 lg:flex-row lg:items-stretch'>
         <AuthHero />
-        <section className='flex min-h-screen flex-1 items-center justify-center px-6 py-12 lg:px-0'>
+        <section className='flex min-h-screen flex-1 items-center justify-center px-6 py-12 lg:min-h-256 lg:w-180 lg:flex-none lg:px-0'>
           <div className='flex w-full max-w-93.5 flex-col items-stretch gap-(--space-2xl)'>
             <FoodyLogo surface='light' priority />
             <AuthHeader title={title} subtitle={subtitle} />
@@ -70,20 +70,17 @@ function AuthTabs({ mode }: { mode: AuthMode }) {
 
 function AuthHero() {
   return (
-    <div className='relative hidden min-h-screen overflow-hidden lg:block lg:w-1/2'>
-      <div className='absolute left-106.25 top-0 h-259.5 w-369.25 max-w-none'>
-        <Image
-          loader={passthroughLoader}
-          unoptimized
-          src={heroImageUrl}
-          alt='Burger hero'
-          fill
-          priority
-          sizes='1477px'
-          className='object-cover'
-        />
-      </div>
+    <div className='relative hidden overflow-hidden lg:block lg:h-256 lg:w-180 lg:flex-none'>
+      <Image
+        loader={passthroughLoader}
+        unoptimized
+        src={heroImageUrl}
+        alt='Burger hero'
+        fill
+        priority
+        sizes='720px'
+        className='object-cover object-center translate-x-[-0.5%] border'
+      />
     </div>
   );
 }
-
