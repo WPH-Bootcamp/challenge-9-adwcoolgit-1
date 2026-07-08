@@ -1,5 +1,9 @@
 import Link from 'next/link';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  ComponentPropsWithoutRef,
+  ReactNode,
+} from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
@@ -10,17 +14,18 @@ const buttonVariants = cva(
     variants: {
       variant: {
         outline: 'border-2 border-neutral-300 bg-transparent text-white',
-        solid: 'bg-white text-(--color-neutral-950)',
-        primary: 'bg-(--color-primary) text-(--color-neutral-25)',
+        solid: 'bg-white text-neutral-950',
+        primary:
+          'bg-(--color-primary) text-white visited:text-white hover:text-white',
         neutralOutline:
-          'border border-neutral-300 bg-transparent text-(--color-neutral-950)',
+          'border border-neutral-300 bg-transparent text-neutral-950',
         text: 'h-auto w-auto bg-transparent p-0 text-(--color-primary)',
       },
       size: {
-        default: 'h-12 w-[163px] rounded-full p-2 text-base leading-7.5',
-        full: 'h-12 w-full rounded-full p-2 text-base leading-[30px]',
-        compact: 'h-12 w-[160px] rounded-full p-2 text-base leading-[30px]',
-        text: 'rounded-none text-base leading-[30px] lg:text-lg lg:leading-8',
+        default: 'h-12 w-40.75 rounded-full p-2 text-base leading-7.5',
+        full: 'h-12 w-full rounded-full p-2 text-base leading-7.5',
+        compact: 'h-12 w-40 rounded-full p-2 text-base leading-7.5',
+        text: 'rounded-none text-base leading-7.5 lg:text-lg lg:leading-8',
       },
     },
     defaultVariants: {
@@ -35,18 +40,15 @@ interface ButtonBaseProps extends VariantProps<typeof buttonVariants> {
   className?: string;
 }
 
-interface LinkButtonProps extends ButtonBaseProps {
-  href: string;
-}
-
 interface NativeButtonProps
   extends
     ButtonBaseProps,
-    Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className'> {
-  href?: undefined;
-}
+    Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className'> {}
 
-type ButtonProps = LinkButtonProps | NativeButtonProps;
+interface LinkButtonProps
+  extends
+    ButtonBaseProps,
+    Omit<ComponentPropsWithoutRef<typeof Link>, 'children' | 'className'> {}
 
 export function Button({
   children,
@@ -54,24 +56,33 @@ export function Button({
   variant,
   size,
   ...props
-}: ButtonProps) {
-  const resolvedClassName = cn(buttonVariants({ variant, size }), className);
-
-  if ('href' in props && props.href) {
-    const { href } = props;
-
-    return (
-      <Link href={href} className={resolvedClassName}>
-        {children}
-      </Link>
-    );
-  }
-
+}: NativeButtonProps) {
   return (
-    <button {...props} className={resolvedClassName}>
+    <button
+      {...props}
+      className={cn(buttonVariants({ variant, size }), className)}
+    >
       {children}
     </button>
   );
 }
 
+export function LinkButton({
+  children,
+  className,
+  variant,
+  size,
+  ...props
+}: LinkButtonProps) {
+  return (
+    <Link
+      {...props}
+      className={cn(buttonVariants({ variant, size }), className)}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export { buttonVariants };
+

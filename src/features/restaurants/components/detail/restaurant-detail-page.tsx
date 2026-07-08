@@ -3,10 +3,11 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { Share2, Star } from 'lucide-react';
+import BagFillIcon from '@iconify-react/lets-icons/bag-fill';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/shared/button';
+import { Button, LinkButton } from '@/components/shared/button';
 import { ChipButton } from '@/components/shared/chip-button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
@@ -25,6 +26,11 @@ import {
 } from '@/features/restaurants/hooks';
 
 const reviewCountFormatter = new Intl.NumberFormat('id-ID');
+const currencyFormatter = new Intl.NumberFormat('id-ID', {
+  style: 'currency',
+  currency: 'IDR',
+  maximumFractionDigits: 0,
+});
 
 type MenuFilter = 'all' | 'food' | 'drink';
 
@@ -69,6 +75,10 @@ function formatReviewCount(count: number) {
   return `${reviewCountFormatter.format(count)} Ulasan`;
 }
 
+function formatCurrency(value: number) {
+  return currencyFormatter.format(value);
+}
+
 export function RestaurantDetailPage({
   restaurantId,
 }: RestaurantDetailPageProps) {
@@ -95,6 +105,16 @@ export function RestaurantDetailPage({
     ? formatDistance(user?.latitude, user?.longitude, restaurant.coordinates)
     : null;
   const averageRating = restaurant?.averageRating ?? restaurant?.rating ?? null;
+  const restaurantItemCount = Object.values(cartSelection).reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  const restaurantSubtotal =
+    restaurant?.menus.reduce((sum, menu) => {
+      const quantity = cartSelection[String(menu.id)]?.quantity ?? 0;
+      return sum + menu.price * quantity;
+    }, 0) ?? 0;
+  const hasCheckoutSummary = restaurantItemCount > 0 && restaurantSubtotal > 0;
 
   async function handleShare() {
     if (!restaurant) {
@@ -175,7 +195,7 @@ export function RestaurantDetailPage({
         cartCount={cartCount}
       />
 
-      <div className='mx-auto flex max-w-360 flex-col gap-4 py-4 sm:gap-10 sm:py-8 lg:gap-12 lg:py-12'>
+      <div className='mx-auto flex max-w-360 flex-col gap-4 py-4 pb-28 sm:gap-10 sm:py-8 sm:pb-32 lg:gap-12 lg:py-12 lg:pb-40'>
         <div className='mx-auto w-full max-w-98.25 px-4 sm:max-w-300 sm:px-6 md:px-8 lg:px-0'>
           {!hasHydrated || detailQuery.isLoading ? (
             <LoadingState
@@ -286,7 +306,7 @@ export function RestaurantDetailPage({
 
                 {filteredMenus.length > 0 ? (
                   <>
-                    <div className='grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:grid-cols-4'>
+                    <div className='grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4'>
                       {visibleMenus.map((menu) => {
                         const cartItem = cartSelection[String(menu.id)];
                         const quantity = cartItem?.quantity ?? 0;
@@ -389,6 +409,33 @@ export function RestaurantDetailPage({
         </div>
       </div>
 
+      {restaurant && hasCheckoutSummary ? (
+        <section className='fixed inset-x-0 bottom-0 z-40 bg-white shadow-[0_0_20px_rgba(203,202,202,0.25)]'>
+          <div className='mx-auto flex h-16 md:h-20 w-full max-w-360 items-center justify-between gap-4 px-4 sm:px-6 md:px-10 lg:px-30'>
+            <div className='flex flex-col items-start gap-0.5'>
+              <div className='flex items-center gap-2'>
+                <BagFillIcon className='size-6 text-neutral-950' />
+                <span className='text-sm md:text-md font-normal leading-7 md:leading-7.5 tracking-tight text-neutral-950'>
+                  {restaurantItemCount} Items
+                </span>
+              </div>
+              <p className='text-base md:text-xl font-extrabold leading-7.5 md:leading-8.5 text-neutral-950'>
+                {formatCurrency(restaurantSubtotal)}
+              </p>
+            </div>
+
+            {/* Checkout Button */}
+            <LinkButton
+              href='/cart'
+              variant={'primary'}
+              className='h-10 md:h-11 w-40 !text-white text-base font-bold leading-7.5 tracking-tight md:w-57.5'
+            >
+              Checkout
+            </LinkButton>
+          </div>
+        </section>
+      ) : null}
+
       <HomeFooter variant='detail' />
     </main>
   );
@@ -409,3 +456,6 @@ function MenuChip({
     </ChipButton>
   );
 }
+
+
+

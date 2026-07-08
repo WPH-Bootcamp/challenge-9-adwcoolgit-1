@@ -1,9 +1,10 @@
 import Image from 'next/image';
 import BagFillIcon from '@iconify-react/lets-icons/bag-fill';
 
-import { Button } from '@/components/shared/button';
+import { LinkButton } from '@/components/shared/button';
 import { FoodyLogo } from '@/components/shared/foody-logo';
 import { IconButton } from '@/components/shared/icon-button';
+import { AuthUserMenu } from '@/components/shared/auth-user-menu';
 import {
   homeHeroImageUrl,
   homeSearchIconUrl,
@@ -56,29 +57,28 @@ export function HomeHero({
               >
                 <BagFillIcon height='1em' className='size-7 sm:size-8' />
               </IconButton>
-              <div className='flex items-center gap-3 sm:gap-4'>
-                <UserAvatar name={userName} avatar={user?.avatar ?? null} />
-                <p className='hidden text-lg font-semibold leading-8 tracking-tight text-white md:block'>
-                  {userName}
-                </p>
-              </div>
+              <AuthUserMenu
+                name={userName}
+                avatar={user?.avatar ?? null}
+                desktopTextClassName='text-white'
+              />
             </div>
           ) : (
             <div className='flex items-center gap-2 sm:gap-3'>
-              <Button
+              <LinkButton
                 href='/login'
                 variant='outline'
                 className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
               >
                 Sign in
-              </Button>
-              <Button
+              </LinkButton>
+              <LinkButton
                 href='/register'
                 variant='solid'
                 className='h-10 w-[108px] text-sm sm:h-12 sm:w-[163px] sm:text-base'
               >
                 Sign up
-              </Button>
+              </LinkButton>
             </div>
           )}
         </header>
@@ -128,36 +128,5 @@ export function HomeHero({
         </div>
       </div>
     </section>
-  );
-}
-
-function UserAvatar({ name, avatar }: { name: string; avatar: string | null }) {
-  if (avatar) {
-    return (
-      <div className='relative size-10 overflow-hidden rounded-full sm:size-12'>
-        <Image
-          loader={passthroughLoader}
-          unoptimized
-          src={avatar}
-          alt={name}
-          fill
-          sizes='48px'
-          className='object-cover'
-        />
-      </div>
-    );
-  }
-
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((value) => value[0]?.toUpperCase())
-    .join('');
-
-  return (
-    <div className='flex size-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fdb022_0%,#c12116_100%)] text-sm font-bold leading-7 tracking-tight text-white sm:size-12 sm:text-base sm:leading-7.5'>
-      {initials || 'JD'}
-    </div>
   );
 }
