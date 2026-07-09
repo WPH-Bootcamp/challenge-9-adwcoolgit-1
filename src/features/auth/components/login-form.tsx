@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { eyeIconUrl, eyeOffIconUrl } from '@/features/auth/constants';
 import {
@@ -48,6 +49,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         email: values.email,
         password: values.password,
       });
+      toast.success('Signed in successfully.');
       router.replace(redirectTo);
     } catch (error) {
       setFormError(getApiErrorMessage(error, 'Unable to sign in right now.'));

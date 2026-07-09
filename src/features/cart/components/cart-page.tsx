@@ -134,12 +134,12 @@ export function CartPage() {
               title='Your cart is empty'
               description='Add menu items from a restaurant detail page to start a multi-restaurant checkout.'
             />
-            <div className='flex justify-center w-1/4 mx-auto'>
+            <div className='mx-auto flex w-full max-w-60 justify-center'>
               <LinkButton
                 href='/'
                 variant='primary'
-                className='text-white!'
-                size={'full'}
+                className='!text-white'
+                size='full'
               >
                 Explore Restaurants
               </LinkButton>

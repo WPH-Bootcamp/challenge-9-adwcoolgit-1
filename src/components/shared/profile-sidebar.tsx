@@ -29,7 +29,7 @@ export function ProfileSidebar({
   }
 
   return (
-    <aside className='w-full rounded-[16px] bg-white p-5 shadow-[0_0_10px_rgba(203,202,202,0.25)] lg:w-60'>
+    <aside className='w-full rounded-[16px] bg-white p-5 shadow-[0_0_10px_rgba(203,202,202,0.25)] md:w-60'>
       <div className='flex flex-col gap-6'>
         <div className='flex items-center gap-2'>
           <UserAvatar

@@ -137,6 +137,16 @@ export function CategoryPage() {
               <ErrorState
                 title='Unable to load restaurants'
                 description='We could not load restaurant discovery data right now. Please try again in a moment.'
+                action={
+                  <Button
+                    type='button'
+                    variant='primary'
+                    className='!text-white'
+                    onClick={() => void discoveryQuery.refetch()}
+                  >
+                    Try Again
+                  </Button>
+                }
               />
             ) : (discoveryQuery.data?.restaurants.length ?? 0) === 0 ? (
               <EmptyState
@@ -454,7 +464,7 @@ function PriceInput({
   );
 }
 
-function CategoryPageSkeleton() {
+export function CategoryPageSkeleton() {
   return (
     <div className='mx-auto flex max-w-360 flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 lg:px-0 lg:py-12'>
       <Skeleton className='h-10 w-52 rounded-xl' />

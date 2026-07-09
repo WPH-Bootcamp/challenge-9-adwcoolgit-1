@@ -3,13 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { Button } from '@/components/shared/button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
-import { OrderHistoryContentSkeleton, OrderHistoryPageSkeleton } from '@/components/shared/page-skeletons';
+import {
+  OrderHistoryContentSkeleton,
+  OrderHistoryPageSkeleton,
+} from '@/components/shared/page-skeletons';
 import { useSessionState } from '@/features/auth/hooks';
 import { useCartQuery } from '@/features/cart/hooks';
 import { HomeFooter } from '@/features/home/components/home-footer';
-import { useOrderHistory, type OrderHistoryFilter } from '@/features/orders/hooks';
+import {
+  useOrderHistory,
+  type OrderHistoryFilter,
+} from '@/features/orders/hooks';
 import { RestaurantDetailHeader } from '@/features/restaurants/components/detail/restaurant-detail-header';
 import type { OrderRecord } from '@/types/domain';
 
@@ -52,16 +59,18 @@ export function OrderHistoryPage() {
           cartCount={cartCount}
         />
 
-        <div className='mx-auto flex max-w-300 flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 lg:flex-row lg:items-start lg:gap-8 lg:px-0 lg:py-12'>
-          <OrderHistorySidebar user={user} />
+        <div className='mx-auto flex w-full max-w-90.25 flex-col gap-4 pt-4 sm:max-w-300 sm:gap-6 sm:px-6 sm:pt-8 md:flex-row md:items-start md:px-8 md:pt-10 lg:gap-8 lg:px-0 lg:pt-12 pb-12 md:pb-25'>
+          <div className='hidden md:block'>
+            <OrderHistorySidebar user={user} />
+          </div>
 
-          <section className='min-w-0 flex-1'>
-            <div className='flex flex-col gap-6'>
-              <h1 className='text-display-md font-extrabold leading-10.5 text-neutral-950'>
+          <section className='min-w-0 w-full flex-1'>
+            <div className='flex flex-col gap-4 sm:gap-6'>
+              <h1 className='text-display-xs font-extrabold leading-9 text-neutral-950 sm:text-display-md sm:leading-10.5'>
                 My Orders
               </h1>
 
-              <div className='rounded-[16px] bg-white p-6 shadow-[0_0_10px_rgba(203,202,202,0.25)]'>
+              <div className='w-full rounded-[16px] bg-white p-4 shadow-[0_0_10px_rgba(203,202,202,0.25)] sm:p-6'>
                 <div className='flex flex-col gap-5'>
                   <OrderHistoryToolbar
                     value={searchQuery}
@@ -76,6 +85,16 @@ export function OrderHistoryPage() {
                     <ErrorState
                       title='Unable to load your orders'
                       description='We could not load your order history right now. Please try again in a moment.'
+                      action={
+                        <Button
+                          type='button'
+                          variant='primary'
+                          className='!text-white'
+                          onClick={() => void orderHistoryQuery.refetch()}
+                        >
+                          Try Again
+                        </Button>
+                      }
                     />
                   ) : orderHistoryQuery.filteredOrders.length === 0 ? (
                     <EmptyState
@@ -83,7 +102,7 @@ export function OrderHistoryPage() {
                       description='Try another status or search term to find matching orders.'
                     />
                   ) : (
-                    <div className='flex flex-col gap-5'>
+                    <div className='flex w-full flex-col gap-4 sm:gap-5'>
                       {orderHistoryQuery.filteredOrders.map((order) => (
                         <OrderHistoryCard
                           key={order.id}
@@ -111,5 +130,3 @@ export function OrderHistoryPage() {
     </>
   );
 }
-
-

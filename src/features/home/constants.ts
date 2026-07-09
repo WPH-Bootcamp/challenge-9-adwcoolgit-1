@@ -2,8 +2,7 @@ import type { ImageLoaderProps } from 'next/image';
 
 export const homeHeroImageUrl = '/images/home-hero.png';
 
-export const homeSearchIconUrl =
-  'https://www.figma.com/api/mcp/asset/909fdcd2-5325-45f1-a766-273624a3fc3d';
+export const homeSearchIconUrl = '/images/search-icon.svg';
 
 export const homeCategoryIconUrls = {
   allRestaurant: '/images/all-restaurant.png',
