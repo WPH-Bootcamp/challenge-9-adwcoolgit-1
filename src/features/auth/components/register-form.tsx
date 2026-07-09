@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { eyeIconUrl, eyeOffIconUrl } from '@/features/auth/constants';
 import {
@@ -48,6 +49,7 @@ export function RegisterForm({ redirectTo }: RegisterFormProps) {
         phone: values.phone,
         password: values.password,
       });
+      toast.success('Account created successfully.');
       router.replace(redirectTo);
     } catch (error) {
       setFormError(

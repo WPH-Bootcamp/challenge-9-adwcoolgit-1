@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { LinkButton } from '@/components/shared/button';
+import { Button, LinkButton } from '@/components/shared/button';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
 import { CheckoutContentSkeleton, CheckoutPageSkeleton } from '@/components/shared/page-skeletons';
@@ -96,9 +96,12 @@ export function CheckoutPage() {
       toast.success('Order placed successfully.');
       router.replace(buildPaymentSuccessUrl(order));
     } catch (error) {
-      setSubmitError(
-        getApiErrorMessage(error, 'Unable to place your order right now.')
+      const message = getApiErrorMessage(
+        error,
+        'Unable to place your order right now.'
       );
+      setSubmitError(message);
+      toast.error(message);
     }
   }
 
@@ -129,6 +132,16 @@ export function CheckoutPage() {
           <ErrorState
             title='Unable to load checkout'
             description='We could not load your current basket for checkout. Please try again in a moment.'
+            action={
+              <Button
+                type='button'
+                variant='primary'
+                className='!text-white'
+                onClick={() => void cartQuery.refetch()}
+              >
+                Try Again
+              </Button>
+            }
           />
         ) : groups.length === 0 || !summary ? (
           <div className='flex flex-col gap-4'>

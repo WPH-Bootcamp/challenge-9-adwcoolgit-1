@@ -58,7 +58,7 @@ export function RestaurantDetailHeader({
             <LinkButton
               href='/register'
               variant='primary'
-              className='h-10 w-27 text-sm sm:h-12 sm:w-40.75 sm:text-base bg-black! text-white!'
+              className='h-10 w-27 text-sm sm:h-12 sm:w-40.75 sm:text-base !text-white'
             >
               Sign up
             </LinkButton>

@@ -1,10 +1,13 @@
-﻿'use client';
+'use client';
 
 import { Search } from 'lucide-react';
 
 import { ChipButton } from '@/components/shared/chip-button';
 
-import { orderHistoryFilters, type OrderHistoryFilter } from '@/features/orders/hooks';
+import {
+  orderHistoryFilters,
+  type OrderHistoryFilter,
+} from '@/features/orders/hooks';
 
 interface OrderHistoryToolbarProps {
   value: string;
@@ -21,8 +24,11 @@ export function OrderHistoryToolbar({
 }: OrderHistoryToolbarProps) {
   return (
     <div className='flex flex-col gap-5'>
-      <label className='flex h-11 w-full max-w-149 items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-4 py-2'>
-        <Search className='size-5 text-neutral-500' strokeWidth={2} />
+      <label className='flex h-11 w-full items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-4 py-2'>
+        <Search
+          className='size-5 shrink-0 text-neutral-500'
+          strokeWidth={1.75}
+        />
         <input
           type='text'
           value={value}
@@ -31,24 +37,22 @@ export function OrderHistoryToolbar({
           className='h-full w-full border-none bg-transparent p-0 text-sm font-normal leading-7 tracking-tight text-neutral-600 outline-none placeholder:text-neutral-600'
         />
       </label>
-
-      <div className='flex flex-col gap-3 md:flex-row md:items-center'>
-        <p className='text-lg font-bold leading-8 tracking-tight text-neutral-950'>
+      {/* Filter Buttons */}
+      <div className='flex flex-wrap items-center gap-2'>
+        <p className='shrink-0 text-sm font-bold leading-7 tracking-tight text-neutral-950'>
           Status
         </p>
-        <div className='flex flex-wrap gap-3'>
-          {orderHistoryFilters.map((filter) => (
-            <ChipButton
-              key={filter.value}
-              type='button'
-              active={activeFilter === filter.value}
-              onClick={() => onFilterChange(filter.value)}
-              className='h-11 px-4 text-base'
-            >
-              {filter.label}
-            </ChipButton>
-          ))}
-        </div>
+        {orderHistoryFilters.map((filter) => (
+          <ChipButton
+            key={filter.value}
+            type='button'
+            active={activeFilter === filter.value}
+            onClick={() => onFilterChange(filter.value)}
+            className='h-10 px-4 text-sm leading-7 sm:text-base sm:leading-7.5'
+          >
+            {filter.label}
+          </ChipButton>
+        ))}
       </div>
     </div>
   );

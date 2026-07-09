@@ -1,10 +1,11 @@
 'use client';
 
-import { startTransition, useMemo, useState } from 'react';
+import { startTransition, type ReactNode, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/shared/button';
 import { useSessionState } from '@/features/auth/hooks';
+import { useCartQuery } from '@/features/cart/hooks';
 import {
   HomeCategoryStrip,
   type HomeCategoryKey,
@@ -35,6 +36,7 @@ export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, user } = useSessionState();
+  const cartQuery = useCartQuery();
   const discoveryState = useMemo(
     () => parseDiscoveryState(searchParams),
     [searchParams]
@@ -107,6 +109,7 @@ export default function HomePage() {
     !isDiscoveryActive &&
     activeCategory === 'all' &&
     recommendedVisibleCount < recommendedRestaurants.length;
+  const cartCount = cartQuery.data?.summary.totalItems ?? 0;
   const hasSavedLocation =
     user?.latitude !== null &&
     user?.latitude !== undefined &&
@@ -154,6 +157,31 @@ export default function HomePage() {
     }
   }
 
+  async function handleSectionRetry() {
+    if (isDiscoveryActive) {
+      await discoveryQuery.refetch();
+      return;
+    }
+
+    switch (activeCategory) {
+      case 'nearby':
+        await nearbyQuery.refetch();
+        return;
+      case 'bestSeller':
+        await bestSellerQuery.refetch();
+        return;
+      case 'lunch':
+        await allRestaurantsQuery.refetch();
+        return;
+      case 'all':
+      default:
+        await Promise.all([
+          allRestaurantsQuery.refetch(),
+          isAuthenticated ? recommendedQuery.refetch() : Promise.resolve(),
+        ]);
+    }
+  }
+
   const curatedSection = getCuratedSection({
     activeCategory,
     isAuthenticated,
@@ -192,6 +220,7 @@ export default function HomePage() {
       <HomeHero
         isAuthenticated={isAuthenticated}
         user={user}
+        cartCount={cartCount}
         searchValue={discoveryState.q}
         onSearchSubmit={handleSearchSubmit}
       />
@@ -265,6 +294,16 @@ export default function HomePage() {
                   : curatedSection.errorDescription
               }
               tone='error'
+              action={
+                <Button
+                  type='button'
+                  variant='primary'
+                  className='!text-white'
+                  onClick={() => void handleSectionRetry()}
+                >
+                  Try Again
+                </Button>
+              }
             />
           ) : sectionRestaurants.length === 0 ? (
             <RecommendationMessage
@@ -334,10 +373,12 @@ function RecommendationMessage({
   title,
   description,
   tone = 'neutral',
+  action,
 }: {
   title: string;
   description: string;
   tone?: 'neutral' | 'error';
+  action?: ReactNode;
 }) {
   const toneClassName =
     tone === 'error'
@@ -350,6 +391,7 @@ function RecommendationMessage({
       <p className='mt-1 text-base font-normal leading-7.5 tracking-tight'>
         {description}
       </p>
+      {action ? <div className='mt-4'>{action}</div> : null}
     </div>
   );
 }

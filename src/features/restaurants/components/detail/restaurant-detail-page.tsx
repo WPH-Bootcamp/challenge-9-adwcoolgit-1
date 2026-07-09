@@ -203,6 +203,16 @@ export function RestaurantDetailPage({
             <ErrorState
               title='Unable to load this restaurant'
               description='We could not load the restaurant details right now. Please try again in a moment.'
+              action={
+                <Button
+                  type='button'
+                  variant='primary'
+                  className='!text-white'
+                  onClick={() => void detailQuery.refetch()}
+                >
+                  Try Again
+                </Button>
+              }
             />
           ) : (
             <>

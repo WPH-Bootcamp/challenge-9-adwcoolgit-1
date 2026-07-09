@@ -1,9 +1,9 @@
+import Link from 'next/link';
 import Image from 'next/image';
 import BagFillIcon from '@iconify-react/lets-icons/bag-fill';
 
 import { LinkButton } from '@/components/shared/button';
 import { FoodyLogo } from '@/components/shared/foody-logo';
-import { IconButton } from '@/components/shared/icon-button';
 import { AuthUserMenu } from '@/components/shared/auth-user-menu';
 import {
   homeHeroImageUrl,
@@ -15,6 +15,7 @@ import type { AuthUser } from '@/types/domain';
 interface HomeHeroProps {
   isAuthenticated: boolean;
   user: AuthUser | null;
+  cartCount: number;
   searchValue: string;
   onSearchSubmit: (value: string) => void;
 }
@@ -22,6 +23,7 @@ interface HomeHeroProps {
 export function HomeHero({
   isAuthenticated,
   user,
+  cartCount,
   searchValue,
   onSearchSubmit,
 }: HomeHeroProps) {
@@ -49,14 +51,18 @@ export function HomeHero({
 
           {isAuthenticated ? (
             <div className='flex items-center gap-3 sm:gap-4 md:gap-6'>
-              <IconButton
-                type='button'
-                variant='ghost'
+              <Link
+                href='/cart'
                 aria-label='Cart'
-                className='size-8 text-white sm:size-8'
+                className='relative flex size-8 cursor-pointer items-center justify-center text-white sm:size-8'
               >
                 <BagFillIcon height='1em' className='size-7 sm:size-8' />
-              </IconButton>
+                {cartCount > 0 ? (
+                  <span className='absolute -right-2 -top-1 flex size-5 items-center justify-center rounded-full bg-(--color-primary) text-[12px] font-bold leading-5 tracking-tight text-white'>
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                ) : null}
+              </Link>
               <AuthUserMenu
                 name={userName}
                 avatar={user?.avatar ?? null}

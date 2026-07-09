@@ -63,6 +63,16 @@ export function ProfilePage() {
             <ErrorState
               title='Profile data is unavailable'
               description='We could not read your profile details right now. Please refresh the page and try again.'
+              action={
+                <Button
+                  type='button'
+                  variant='primary'
+                  className='!text-white'
+                  onClick={() => router.refresh()}
+                >
+                  Refresh
+                </Button>
+              }
             />
           </div>
         </div>
@@ -80,8 +90,10 @@ export function ProfilePage() {
         cartCount={cartCount}
       />
 
-      <div className='mx-auto flex max-w-300 flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 lg:flex-row lg:items-start lg:gap-8 lg:px-0 lg:py-12'>
-        <ProfileSidebar user={user} activeItem='profile' />
+      <div className='mx-auto flex max-w-300 flex-col gap-8 px-4 py-8 sm:px-6 md:flex-row md:items-start md:px-8 lg:gap-8 lg:px-0 lg:py-12'>
+        <div className='hidden md:block'>
+          <ProfileSidebar user={user} activeItem='profile' />
+        </div>
 
         <section className='min-w-0 flex-1'>
           <div className='flex max-w-[524px] flex-col gap-6'>
